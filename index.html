@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Peach Ice Cream</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Georgia", serif;
+        overflow: hidden;
+      }
+      :root {
+        --g1: 255, 200, 150; /* warm peach */
+        --g2: 255, 140, 100; /* vibrant coral */
+        --g3: 255, 180, 140; /* soft peach-coral */
+        --g4: 255, 220, 180; /* creamy peach */
+        --accent1: 255, 160, 100; /* bright accent */
+        --accent2: 255, 190, 130; /* mid accent */
+      }
+
+      /* full-page animated gradient behind everything - warmer peach tones */
+      .bg-gradient {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background: linear-gradient(
+          135deg,
+          rgba(var(--g1), 1) 0%,
+          rgba(var(--g2), 1) 30%,
+          rgba(var(--g3), 1) 65%,
+          rgba(var(--g4), 1) 100%
+        );
+        background-size: 300% 300%;
+        animation: gradient-shift 20s ease-in-out infinite;
+        transition: opacity 0.4s linear;
+      }
+
+      @keyframes gradient-shift {
+        0% {
+          background-position: 0% 50%;
+        }
+        33% {
+          background-position: 100% 50%;
+        }
+        66% {
+          background-position: 50% 100%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+      /* subtle grain / film look using a tiny inline SVG data URI */
+      .bg-gradient::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        mix-blend-mode: soft-light;
+        opacity: 0.06;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.6"/></svg>');
+      }
+
+      .bg-blobs {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+      }
+      .bg-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(70px) saturate(110%);
+        opacity: 0.16;
+        transform: translate3d(0, 0, 0);
+      }
+      .bg-blob.b1 {
+        width: 640px;
+        height: 640px;
+        left: 8%;
+        top: 10%;
+        background: radial-gradient(
+          circle at 30% 30%,
+          rgba(255, 180, 120, 0.4),
+          rgba(255, 200, 150, 0.05)
+        );
+        animation: blob-float-1 16s ease-in-out infinite;
+      }
+      .bg-blob.b2 {
+        width: 520px;
+        height: 520px;
+        right: 6%;
+        top: 18%;
+        background: radial-gradient(
+          circle at 40% 40%,
+          rgba(255, 140, 100, 0.45),
+          rgba(255, 160, 100, 0.04)
+        );
+        animation: blob-float-2 20s ease-in-out infinite;
+      }
+      .bg-blob.b3 {
+        width: 760px;
+        height: 760px;
+        left: 20%;
+        bottom: 6%;
+        background: radial-gradient(
+          circle at 30% 40%,
+          rgba(255, 190, 130, 0.5),
+          rgba(255, 220, 180, 0.02)
+        );
+        animation: blob-float-3 24s ease-in-out infinite;
+      }
+
+      @keyframes blob-float-1 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        33% {
+          transform: translate(-15px, -30px) scale(1.05);
+        }
+        66% {
+          transform: translate(20px, -20px) scale(0.98);
+        }
+      }
+      @keyframes blob-float-2 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        40% {
+          transform: translate(15px, -25px) scale(1.03);
+        }
+        80% {
+          transform: translate(-10px, -15px) scale(1.02);
+        }
+      }
+      @keyframes blob-float-3 {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        50% {
+          transform: translate(-20px, -35px) scale(1.04);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .bg-blob {
+          animation: none !important;
+        }
+        .bg-gradient {
+          transition: none !important;
+        }
+      }
+
+      .container {
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 200, 150, 0.3) 0%,
+          rgba(255, 180, 140, 0.2) 100%
+        );
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .nav-arrows {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .arrow {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 20px;
+        color: white;
+      }
+
+      .logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+      }
+
+      .header-right {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+      }
+
+      .main-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 1400px;
+        padding: 0 80px;
+        gap: 80px;
+      }
+
+      .text-section {
+        color: white;
+        max-width: 400px;
+        flex-shrink: 0;
+      }
+
+      .text-section h1 {
+        font-size: 52px;
+        margin-bottom: 5px;
+        font-weight: normal;
+      }
+
+      .text-section h2 {
+        font-size: 72px;
+        font-style: italic;
+        margin-bottom: 30px;
+        font-weight: normal;
+        line-height: 1;
+      }
+
+      .text-section p {
+        font-size: 17px;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.95);
+        font-family: Arial, sans-serif;
+      }
+
+      /* scale the image section to roughly 2/3 of the viewport width (responsive) */
+      .image-section {
+        position: relative;
+        /* aim for ~66% of viewport width but constrain for very wide/small screens */
+        width: min(66vw, 920px);
+        height: min(66vw, 920px);
+        flex-shrink: 0;
+      }
+
+      .background-circle {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 35% 30%,
+          rgba(255, 220, 180, 0.12),
+          rgba(255, 180, 140, 0.06) 30%,
+          rgba(255, 160, 120, 0.03) 50%,
+          transparent 65%
+        );
+        top: 0;
+        left: 0;
+        z-index: 1;
+        /* subtle animated breathing and slow rotation */
+        transform-origin: 50% 50%;
+        animation: bg-breathe 9s ease-in-out infinite,
+          bg-rotate 32s linear infinite;
+        will-change: transform;
+        transition: transform 400ms cubic-bezier(0.34, 1.26, 0.64, 1);
+      }
+
+      @keyframes bg-breathe {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.04);
+        }
+      }
+      @keyframes bg-rotate {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* inner circle scales with the image-section for consistent proportions */
+      .inner-circle {
+        position: absolute;
+        width: 72%;
+        height: 72%;
+        max-width: 720px;
+        max-height: 720px;
+        border-radius: 50%;
+        /* enhanced gradient with warmer peach tones */
+        background: linear-gradient(
+          145deg,
+          rgba(255, 220, 180, 0.95) 0%,
+          rgba(255, 180, 140, 0.92) 35%,
+          rgba(255, 160, 120, 0.9) 70%,
+          rgba(255, 140, 100, 0.88) 100%
+        );
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 20px 70px rgba(255, 140, 80, 0.25),
+          0 8px 30px rgba(0, 0, 0, 0.15);
+        overflow: visible;
+      }
+
+      /* layered inner elements: glass plate and solid core */
+      .inner-plate {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 92%;
+        height: 92%;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 2;
+        background: rgba(255, 240, 220, 0.06);
+        border: 1px solid rgba(255, 200, 150, 0.25);
+        backdrop-filter: blur(8px);
+        box-shadow: inset 0 2px 0 rgba(255, 220, 180, 0.12),
+          0 0 20px rgba(255, 180, 120, 0.08);
+      }
+      .inner-core {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 78%;
+        height: 78%;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 1;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 180, 140, 0.85) 0%,
+          rgba(255, 160, 120, 0.9) 50%,
+          rgba(255, 140, 100, 0.95) 100%
+        );
+        box-shadow: 0 12px 35px rgba(255, 140, 80, 0.2),
+          inset 0 -3px 10px rgba(255, 100, 60, 0.15);
+      }
+
+      /* scoop occupies a larger fraction of the inner circle */
+      .icecream-scoop {
+        width: 58%;
+        height: 58%;
+        min-width: 220px;
+        min-height: 220px;
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.32);
+      }
+
+      .icecream-scoop img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      /* slices use percentages so they scale with the image-section */
+      .peach-slice {
+        position: absolute;
+        width: 12%;
+        height: auto;
+        transition: transform 800ms cubic-bezier(0.34, 1.26, 0.64, 1),
+          opacity 500ms ease, filter 400ms ease;
+        filter: drop-shadow(0 6px 18px rgba(255, 140, 80, 0.3))
+          drop-shadow(0 0 15px rgba(255, 180, 120, 0.2));
+      }
+
+      .peach-slice img {
+        width: 180%;
+        height: 180%;
+        object-fit: cover;
+        display: block;
+      }
+
+      /* position tweaks in percentages for scaled layout */
+      .slice-1 {
+        top: 12%;
+        left: 6%;
+      }
+      .slice-2 {
+        bottom: 12%;
+        left: 10%;
+      }
+      .slice-3 {
+        top: 12%;
+        right: 6%;
+      }
+      .slice-4 {
+        bottom: 12%;
+        right: 8%;
+      }
+
+      .nav-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 60px;
+        color: white;
+        cursor: pointer;
+        z-index: 20;
+        opacity: 0.6;
+        transition: opacity 0.3s;
+        user-select: none;
+      }
+
+      .nav-button:hover {
+        opacity: 1;
+      }
+
+      .nav-left {
+        left: 30px;
+      }
+      /* Scoop & slice animation styles (non-destructive additions) */
+      .image-section {
+        --scoop-radius: 140px;
+      }
+      .icecream-scoop {
+        position: relative;
+        z-index: 5;
+        /* container transforms will be applied from JS to avoid conflicts */
+        transition: transform 260ms cubic-bezier(0.2, 0.9, 0.2, 1);
+      }
+
+      .peach-slice {
+        transition: transform 800ms cubic-bezier(0.34, 1.26, 0.64, 1),
+          opacity 500ms ease, filter 400ms ease;
+        filter: drop-shadow(0 6px 18px rgba(255, 140, 80, 0.3))
+          drop-shadow(0 0 15px rgba(255, 180, 120, 0.2));
+        transform-origin: center;
+        z-index: 6;
+      }
+      /* enhanced shadow and glow when slices move */
+      .peach-slice.moving {
+        filter: drop-shadow(0 14px 30px rgba(255, 140, 80, 0.45))
+          drop-shadow(0 0 25px rgba(255, 180, 120, 0.35));
+      }
+
+      /* scoop image idle bob (applies to the inner image so container transforms are free)
+         disabled when prefers-reduced-motion */
+      @keyframes scoop-bob {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        25% {
+          transform: translateY(-8px) rotate(-1deg);
+        }
+        50% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        75% {
+          transform: translateY(4px) rotate(0.5deg);
+        }
+      }
+      .icecream-scoop img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        will-change: transform;
+        animation: scoop-bob 7s ease-in-out infinite;
+        transform-origin: 50% 50%;
+      }
+
+      /* stronger wobble while orbiting */
+      @keyframes scoop-wobble {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        25% {
+          transform: translateY(-12px) rotate(-1.8deg);
+        }
+        50% {
+          transform: translateY(2px) rotate(0deg);
+        }
+        75% {
+          transform: translateY(6px) rotate(1.2deg);
+        }
+      }
+      .image-section.orbiting .icecream-scoop img {
+        animation: scoop-wobble 1400ms ease-in-out infinite;
+      }
+
+      /* pop effect when assembling */
+      @keyframes scoop-pop {
+        0% {
+          transform: scale(1);
+        }
+        30% {
+          transform: scale(1.18);
+        }
+        60% {
+          transform: scale(0.96);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      .icecream-scoop.pop img {
+        animation: scoop-pop 550ms cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      /* assembled state when slices merge into scoop */
+      .image-section.assembled .peach-slice {
+        transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1),
+          opacity 400ms ease;
+      }
+      .image-section.assembled .icecream-scoop {
+        transform: scale(1.06);
+        box-shadow: 0 25px 70px rgba(255, 140, 80, 0.55),
+          0 0 40px rgba(255, 180, 120, 0.4);
+        transition: transform 550ms cubic-bezier(0.34, 1.56, 0.64, 1),
+          box-shadow 550ms ease;
+      }
+
+      /* reduced motion fallback */
+      @media (prefers-reduced-motion: reduce) {
+        .peach-slice,
+        .icecream-scoop {
+          transition: none !important;
+          transform: none !important;
+        }
+      }
+      /* rotor rings styling */
+      .rotor {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        /* scale rotor relative to inner-circle for consistent proportions */
+        width: 86%;
+        height: 86%;
+        pointer-events: none;
+        z-index: 3;
+      }
+
+      /* full-page interactive light (follows cursor) */
+      #page-light {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+        mix-blend-mode: screen;
+        opacity: 0.8;
+      }
+      #page-light::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at var(--lx, 50%) var(--ly, 50%),
+          rgba(255, 220, 180, 0.18),
+          rgba(255, 180, 140, 0.08) 25%,
+          rgba(255, 160, 120, 0.04) 45%,
+          transparent 65%
+        );
+        filter: blur(60px);
+        transition: opacity 350ms ease-out;
+      }
+      .rotor .ring {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(8px);
+      }
+      .rotor .ring-1 {
+        width: 86%;
+        height: 86%;
+        border: 2px solid rgba(255, 200, 150, 0.35);
+        box-shadow: 0 0 25px rgba(255, 180, 120, 0.15),
+          inset 0 0 20px rgba(255, 220, 180, 0.08);
+      }
+      .rotor .ring-2 {
+        width: 66%;
+        height: 66%;
+        border: 1.5px solid rgba(255, 160, 120, 0.3);
+        box-shadow: 0 0 20px rgba(255, 140, 100, 0.12),
+          inset 0 0 15px rgba(255, 200, 150, 0.06);
+        backdrop-filter: blur(6px);
+      }
+      .rotor .ring-3 {
+        width: 46%;
+        height: 46%;
+        border: 1px solid rgba(255, 180, 140, 0.25);
+        box-shadow: 0 0 15px rgba(255, 160, 100, 0.1),
+          inset 0 0 10px rgba(255, 220, 180, 0.05);
+        backdrop-filter: blur(4px);
+      }
+      /* animations: paused by default, enabled when .rotating is added */
+      @keyframes spin {
+        from {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+      @keyframes spin-reverse {
+        from {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+        to {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+      }
+      .rotor .ring {
+        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        animation-iteration-count: infinite;
+        animation-play-state: paused;
+      }
+      .rotor .ring-1 {
+        animation-name: spin;
+        animation-duration: 30s;
+      }
+      .rotor .ring-2 {
+        animation-name: spin-reverse;
+        animation-duration: 20s;
+      }
+      .rotor .ring-3 {
+        animation-name: spin;
+        animation-duration: 12s;
+      }
+      .rotor.rotating .ring {
+        animation-play-state: running;
+      }
+      /* spinburst temporarily speeds up and scales rings */
+      .rotor.spinburst .ring {
+        animation-duration: 450ms !important;
+        transform-origin: 50% 50%;
+        transition: transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1),
+          box-shadow 450ms ease;
+      }
+      .rotor.spinburst .ring-1 {
+        transform: translate(-50%, -50%) scale(1.08);
+        box-shadow: 0 0 40px rgba(255, 180, 120, 0.4),
+          inset 0 0 30px rgba(255, 220, 180, 0.15);
+      }
+      .rotor.spinburst .ring-2 {
+        transform: translate(-50%, -50%) scale(1.06);
+        box-shadow: 0 0 35px rgba(255, 140, 100, 0.35),
+          inset 0 0 25px rgba(255, 200, 150, 0.12);
+      }
+      .rotor.spinburst .ring-3 {
+        transform: translate(-50%, -50%) scale(1.04);
+        box-shadow: 0 0 30px rgba(255, 160, 100, 0.3),
+          inset 0 0 20px rgba(255, 220, 180, 0.1);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .rotor .ring {
+          animation: none !important;
+        }
+        .background-circle {
+          animation: none !important;
+        }
+        .peach-slice,
+        .icecream-scoop,
+        .icecream-scoop img {
+          transition: none !important;
+          animation: none !important;
+          transform: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Background enhancement layers: animated gradient + large blurred blobs -->
+    <div class="bg-gradient" aria-hidden="true"></div>
+    <div class="bg-blobs" aria-hidden="true">
+      <div class="bg-blob b1"></div>
+      <div class="bg-blob b2"></div>
+      <div class="bg-blob b3"></div>
+    </div>
+    <div class="container">
+      <div class="header">
+        <div class="nav-arrows">
+          <div class="arrow">‹</div>
+          <div class="arrow">›</div>
+          <div class="logo">h</div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="text-section">
+          <h1>Peach</h1>
+          <h2>Ice Cream</h2>
+          <p>
+            Delicate peach flavor blended into smooth, velvety ice cream for a
+            summer-perfect indulgence. Enjoy the fruity essence in creamy,
+            dreamy scoops that practically melt in your mouth, bringing a burst
+            of natural sweetness and happiness with every delightful bite.
+          </p>
+        </div>
+
+        <div class="image-section">
+          <div class="background-circle"></div>
+          <div class="inner-circle">
+            <!-- decorative rotating rings around the scoop -->
+            <div class="rotor" aria-hidden="true">
+              <div class="ring ring-1"></div>
+              <div class="ring ring-2"></div>
+              <div class="ring ring-3"></div>
+            </div>
+            <!-- glass plate and solid core inside inner-circle -->
+            <div class="inner-plate" aria-hidden="true"></div>
+            <div class="inner-core" aria-hidden="true"></div>
+            <div class="icecream-scoop">
+              <img src="scoop.png" alt="Peach Ice Cream" />
+              <div class="scoop-overlay" aria-hidden="true"></div>
+            </div>
+          </div>
+
+          <div class="peach-slice slice-1">
+            <img src="peace slice.png" alt="Peach Slice" />
+          </div>
+          <div class="peach-slice slice-2">
+            <img src="peace slice.png" alt="Peach Slice" />
+          </div>
+          <div class="peach-slice slice-3">
+            <img src="peace slice.png" alt="Peach Slice" />
+          </div>
+          <div class="peach-slice slice-4">
+            <img src="peace slice.png" alt="Peach Slice" />
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-button nav-left">‹</div>
+    </div>
+  </body>
+  <script>
+    // Animation logic: move peach slices toward the scoop in a nice UX-friendly way.
+    (function () {
+      const section = document.querySelector(".image-section");
+      if (!section) return;
+      const scoop = section.querySelector(".icecream-scoop");
+      const slices = Array.from(section.querySelectorAll(".peach-slice"));
+      const rotor = section.querySelector(".rotor");
+      const scoopImg = scoop.querySelector("img");
+      const prefersReduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+      // store original centers for slices so they can reliably return to their original spots
+      let originalCenters = slices.map((s) => {
+        const r = s.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      });
+
+      // manage scoop container transform parts to avoid clobbering from different interactions
+      const scoopState = { tx: 0, ty: 0, rot: 0, scale: 1 };
+      function applyScoopTransform() {
+        scoop.style.transform = `translate(${scoopState.tx}px, ${scoopState.ty}px) rotate(${scoopState.rot}deg) scale(${scoopState.scale})`;
+      }
+      function setScoopScale(s) {
+        scoopState.scale = s;
+        applyScoopTransform();
+      }
+
+      function getCenterRect(el) {
+        const r = el.getBoundingClientRect();
+        return {
+          x: r.left + r.width / 2,
+          y: r.top + r.height / 2,
+          w: r.width,
+          h: r.height,
+          rect: r,
+        };
+      }
+
+      // compute target positions for N slices around the scoop
+      function computeTargets() {
+        const sc = getCenterRect(scoop);
+        const radius = Math.max(sc.w, sc.h) * 0.6 + 30; // ring radius
+        const targets = [];
+        const n = slices.length;
+        // place them around top-half nicer angles for UI
+        const baseAngles = [-70, -20, 20, 70];
+        for (let i = 0; i < n; i++) {
+          const ang =
+            baseAngles[i] !== undefined
+              ? baseAngles[i] * (Math.PI / 180)
+              : i * ((2 * Math.PI) / n);
+          const tx = sc.x + Math.cos(ang) * radius;
+          const ty = sc.y + Math.sin(ang) * radius;
+          targets.push({ x: tx, y: ty, angle: ang });
+        }
+        return { sc, targets };
+      }
+
+      let lastTargets = null;
+      // orbit state
+      let orbitRAF = null;
+      let orbitAngles = [];
+      let orbitOrigCenters = [];
+      let orbitStart = 0;
+
+      function moveSlicesToTargets() {
+        if (prefersReduced) return;
+        const { sc, targets } = computeTargets();
+        lastTargets = { sc, targets };
+        slices.forEach((slice, i) => {
+          // compute transform relative to original center so resets are consistent
+          const orig = originalCenters[i];
+          const t = targets[i];
+          const dx = t.x - orig.x;
+          const dy = t.y - orig.y;
+          // small rotation so slices look natural
+          const rot = (t.angle || 0) * (180 / Math.PI) + (i % 2 ? 12 : -10);
+          slice.classList.add("moving");
+          slice.style.transition =
+            "transform 800ms cubic-bezier(.34,1.26,.64,1), opacity 500ms ease, filter 400ms ease";
+          slice.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg) scale(1.05)`;
+          slice.style.opacity = "1";
+        });
+        // start slow rotor and orbit when hovering
+        if (rotor) rotor.classList.add("rotating");
+        startOrbit();
+      }
+
+      function resetSlices() {
+        if (prefersReduced) return;
+        stopOrbit();
+        slices.forEach((slice) => {
+          slice.classList.remove("moving");
+          // smoothly return to original (clear transform so CSS positioning resumes)
+          slice.style.transition =
+            "transform 600ms cubic-bezier(.34,1.56,.64,1), opacity 400ms ease, filter 400ms ease";
+          slice.style.transform = "";
+          slice.style.opacity = "";
+        });
+        if (rotor) rotor.classList.remove("rotating");
+      }
+
+      // assemble animation: slices move into scoop center and shrink briefly
+      function assembleIntoScoop() {
+        if (prefersReduced) return;
+        stopOrbit();
+        const sc = getCenterRect(scoop);
+        slices.forEach((slice, i) => {
+          const srect = slice.getBoundingClientRect();
+          const sx = srect.left + srect.width / 2;
+          const sy = srect.top + srect.height / 2;
+          const dx = sc.x - sx;
+          const dy = sc.y - sy;
+          slice.style.transition =
+            "transform 550ms cubic-bezier(.34,1.56,.64,1), opacity 400ms ease, filter 300ms ease";
+          slice.style.transform = `translate(${dx}px, ${dy}px) scale(.06)`;
+          slice.style.opacity = "0";
+        });
+        section.classList.add("assembled");
+        // spinburst the rotor for a short, punchy effect
+        if (rotor) {
+          rotor.classList.add("spinburst");
+        }
+        // pulse/pop scoop using managed state and image animation
+        setScoopScale(1.08);
+        scoop.classList.add("pop");
+        setTimeout(() => {
+          // revert everything
+          slices.forEach((s) => {
+            s.style.transition = "";
+            s.style.transform = "";
+            s.style.opacity = "";
+          });
+          // reset scoop visuals
+          setScoopScale(1);
+          scoop.classList.remove("pop");
+          section.classList.remove("assembled");
+          if (rotor) {
+            rotor.classList.remove("spinburst");
+            rotor.classList.remove("rotating");
+          }
+        }, 850);
+      }
+
+      // event wiring: hover moves slices, leave resets, click assembles
+      section.addEventListener("pointerenter", (e) => {
+        // position slices once and start orbit; avoid repeatedly repositioning on every pointermove
+        moveSlicesToTargets();
+      });
+      section.addEventListener("pointermove", (e) => {
+        // only update scoop tilt on pointer move to avoid conflicting transforms with the orbit RAF
+        if (!prefersReduced) updateScoopTilt(e);
+      });
+      section.addEventListener("pointerleave", (e) => {
+        resetSlices();
+        if (!prefersReduced) resetScoopTilt();
+      });
+
+      // scoop hover/focus interactions: small scale on enter, reset on leave
+      scoop.addEventListener("pointerenter", () => {
+        if (!prefersReduced) setScoopScale(1.04);
+      });
+      scoop.addEventListener("pointerleave", () => {
+        if (!prefersReduced) setScoopScale(1);
+      });
+
+      // tilt helper: micro-tilt based on pointer relative to scoop center
+      function updateScoopTilt(e) {
+        const sc = getCenterRect(scoop);
+        const dx = (e.clientX - sc.x) / sc.w; // -0.5..0.5 roughly
+        const dy = (e.clientY - sc.y) / sc.h;
+        // small pixel offsets and rotation
+        scoopState.tx = Math.max(-12, Math.min(12, dx * 28));
+        scoopState.ty = Math.max(-10, Math.min(10, dy * 20));
+        scoopState.rot = Math.max(-6, Math.min(6, dx * 12));
+        applyScoopTransform();
+      }
+      function resetScoopTilt() {
+        scoopState.tx = 0;
+        scoopState.ty = 0;
+        scoopState.rot = 0;
+        applyScoopTransform();
+      }
+
+      // orbiting behavior: continuously update slice transforms while hovering
+      function startOrbit() {
+        if (prefersReduced) return;
+        if (orbitRAF) return; // already running
+        const sc = getCenterRect(scoop);
+        orbitStart = performance.now();
+        orbitAngles = slices.map((slice, i) => {
+          const s = slice.getBoundingClientRect();
+          const a = Math.atan2(
+            s.top + s.height / 2 - sc.y,
+            s.left + s.width / 2 - sc.x
+          );
+          return a + i * 0.3;
+        });
+        // base orbit on the original centers so orbiting always returns cleanly
+        orbitOrigCenters = originalCenters.slice();
+        section.classList.add("orbiting");
+        scoop.classList.add("wobble");
+
+        function orbitTick(now) {
+          const elapsed = (now - orbitStart) * 0.001;
+          const speed = 0.7; // radians/sec - slightly slower for smoother feel
+          const rBase = Math.max(40, Math.min(80, (sc.w || 140) * 0.26));
+          slices.forEach((slice, i) => {
+            const baseAngle = orbitAngles[i];
+            const angle = baseAngle + elapsed * (speed + i * 0.04);
+            // make orbit slightly elliptical for a natural look
+            const ox = Math.cos(angle) * rBase;
+            const oy = Math.sin(angle) * (rBase * 0.8);
+            const targetX = sc.x + ox;
+            const targetY = sc.y + oy;
+            const orig = orbitOrigCenters[i];
+            const dx = targetX - orig.x;
+            const dy = targetY - orig.y;
+            const rot = (angle * 180) / Math.PI + (i % 2 ? 12 : -10);
+            slice.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg) scale(1.05)`;
+          });
+          orbitRAF = requestAnimationFrame(orbitTick);
+        }
+        orbitRAF = requestAnimationFrame(orbitTick);
+      }
+
+      function stopOrbit() {
+        if (!orbitRAF) return;
+        cancelAnimationFrame(orbitRAF);
+        orbitRAF = null;
+        orbitAngles = [];
+        orbitOrigCenters = [];
+        section.classList.remove("orbiting");
+        scoop.classList.remove("wobble");
+      }
+      scoop.addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        assembleIntoScoop();
+      });
+
+      // keep positions updated on resize
+      window.addEventListener("resize", () => {
+        // recompute original centers in case layout changed
+        originalCenters = slices.map((s) => {
+          const r = s.getBoundingClientRect();
+          return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        });
+        if (lastTargets) moveSlicesToTargets();
+      });
+
+      // accessibility: keyboard activation when scoop is focused
+      scoop.setAttribute("tabindex", "0");
+      scoop.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          assembleIntoScoop();
+        }
+      });
+    })();
+  </script>
+  <script>
+    // page-wide interactive background and outer-circle parallax
+    (function () {
+      const prefersReduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      if (prefersReduced) return;
+      const bg = document.querySelector(".background-circle");
+      const rotor = document.querySelector(".rotor");
+      const blobs = Array.from(document.querySelectorAll(".bg-blob"));
+      const bgGradient = document.querySelector(".bg-gradient");
+      // create page light element if missing
+      let pageLight = document.getElementById("page-light");
+      if (!pageLight) {
+        pageLight = document.createElement("div");
+        pageLight.id = "page-light";
+        document.body.appendChild(pageLight);
+      }
+
+      let lastX = 0,
+        lastY = 0;
+      let raf = null;
+
+      function onPointer(e) {
+        lastX = e.clientX;
+        lastY = e.clientY;
+        if (!raf) raf = requestAnimationFrame(update);
+      }
+
+      function update() {
+        raf = null;
+        const w = window.innerWidth,
+          h = window.innerHeight;
+        const nx = (lastX / w - 0.5) * 2; // -1..1
+        const ny = (lastY / h - 0.5) * 2;
+        // small translate and rotate for background circle
+        if (bg) {
+          const tx = nx * 18;
+          const ty = ny * 12;
+          const r = nx * 8;
+          bg.style.transform = `translate(${tx}px, ${ty}px) rotate(${r}deg)`;
+        }
+        // subtle extra rotation overlay for rotor (adds to CSS spin)
+        if (rotor) {
+          const extra = nx * 20;
+          rotor.style.transform = `translate(-50%,-50%) rotate(${extra}deg)`;
+        }
+        // parallax the large background blobs to create depth
+        if (blobs && blobs.length) {
+          blobs.forEach((b, i) => {
+            const depth = (i + 1) * 6; // different parallax per blob
+            const bx = nx * depth * (i % 2 ? 1 : -1);
+            const by = ny * depth * (i % 2 ? -1 : 1);
+            b.style.transform = `translate3d(${bx}px, ${by}px, 0)`;
+          });
+        }
+        if (bgGradient) {
+          const gtx = nx * 8;
+          const gty = ny * 6;
+          bgGradient.style.transform = `translate(${gtx}px, ${gty}px)`;
+        }
+        // page light follow
+        if (pageLight) {
+          const lx = 50 + nx * 22;
+          const ly = 50 + ny * 18;
+          pageLight.style.setProperty("--lx", lx + "%");
+          pageLight.style.setProperty("--ly", ly + "%");
+        }
+      }
+
+      window.addEventListener("pointermove", onPointer, { passive: true });
+      // on touchstart also update quickly
+      window.addEventListener(
+        "touchstart",
+        (e) => {
+          if (e.touches && e.touches[0]) onPointer(e.touches[0]);
+        },
+        { passive: true }
+      );
+
+      // subtle idle motion when no pointer: gentle slow loop
+      let idleTheta = 0;
+      let idleRAF = null;
+      function idleTick() {
+        idleTheta += 0.002;
+        if (bg) {
+          const tx = Math.sin(idleTheta) * 6;
+          const ty = Math.cos(idleTheta) * 4;
+          bg.style.transform = `translate(${tx}px, ${ty}px) rotate(${
+            idleTheta * 6
+          }deg)`;
+        }
+        idleRAF = requestAnimationFrame(idleTick);
+      }
+      idleRAF = requestAnimationFrame(idleTick);
+
+      // pause idle when pointer moves, then resume after timeout
+      let idlePauseTimer = null;
+      function pauseIdle() {
+        if (idleRAF) {
+          cancelAnimationFrame(idleRAF);
+          idleRAF = null;
+        }
+        if (idlePauseTimer) clearTimeout(idlePauseTimer);
+        idlePauseTimer = setTimeout(() => {
+          if (!idleRAF) idleRAF = requestAnimationFrame(idleTick);
+        }, 900);
+      }
+      window.addEventListener("pointermove", pauseIdle, { passive: true });
+
+      // speed up bg/rotor briefly when assembled (hook into existing classes)
+      const observer = new MutationObserver((mut) => {
+        for (const m of mut) {
+          if (m.type === "attributes" && m.attributeName === "class") {
+            const target = m.target;
+            if (target.classList && target.classList.contains("assembled")) {
+              // bump rotor and bg
+              if (rotor) rotor.classList.add("spinburst");
+              if (bg) {
+                bg.style.transition = "transform 260ms ease-out";
+                bg.style.transform += " scale(1.01)";
+              }
+              setTimeout(() => {
+                if (rotor) rotor.classList.remove("spinburst");
+                if (bg) bg.style.transition = "";
+              }, 650);
+            }
+          }
+        }
+      });
+      const sect = document.querySelector(".image-section");
+      if (sect)
+        observer.observe(sect, {
+          attributes: true,
+          attributeFilter: ["class"],
+        });
+    })();
+  </script>
+</html>
