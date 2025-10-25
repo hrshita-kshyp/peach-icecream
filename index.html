@@ -117,8 +117,7 @@
       }
 
       @keyframes blob-float-1 {
-        0%,
-        100% {
+        0%, 100% {
           transform: translate(0, 0) scale(1);
         }
         33% {
@@ -129,8 +128,7 @@
         }
       }
       @keyframes blob-float-2 {
-        0%,
-        100% {
+        0%, 100% {
           transform: translate(0, 0) scale(1);
         }
         40% {
@@ -141,8 +139,7 @@
         }
       }
       @keyframes blob-float-3 {
-        0%,
-        100% {
+        0%, 100% {
           transform: translate(0, 0) scale(1);
         }
         50% {
@@ -162,11 +159,9 @@
       .container {
         width: 100vw;
         height: 100vh;
-        background: linear-gradient(
-          135deg,
-          rgba(255, 200, 150, 0.3) 0%,
-          rgba(255, 180, 140, 0.2) 100%
-        );
+        background: linear-gradient(135deg, 
+          rgba(255, 200, 150, 0.3) 0%, 
+          rgba(255, 180, 140, 0.2) 100%);
         position: relative;
         display: flex;
         align-items: center;
@@ -291,8 +286,7 @@
       }
 
       @keyframes bg-breathe {
-        0%,
-        100% {
+        0%, 100% {
           transform: scale(1);
         }
         50% {
@@ -331,7 +325,7 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0 20px 70px rgba(255, 140, 80, 0.25),
-          0 8px 30px rgba(0, 0, 0, 0.15);
+                    0 8px 30px rgba(0, 0, 0, 0.15);
         overflow: visible;
       }
 
@@ -350,7 +344,7 @@
         border: 1px solid rgba(255, 200, 150, 0.25);
         backdrop-filter: blur(8px);
         box-shadow: inset 0 2px 0 rgba(255, 220, 180, 0.12),
-          0 0 20px rgba(255, 180, 120, 0.08);
+                    0 0 20px rgba(255, 180, 120, 0.08);
       }
       .inner-core {
         position: absolute;
@@ -362,14 +356,12 @@
         border-radius: 50%;
         pointer-events: none;
         z-index: 1;
-        background: linear-gradient(
-          135deg,
+        background: linear-gradient(135deg,
           rgba(255, 180, 140, 0.85) 0%,
           rgba(255, 160, 120, 0.9) 50%,
-          rgba(255, 140, 100, 0.95) 100%
-        );
+          rgba(255, 140, 100, 0.95) 100%);
         box-shadow: 0 12px 35px rgba(255, 140, 80, 0.2),
-          inset 0 -3px 10px rgba(255, 100, 60, 0.15);
+                    inset 0 -3px 10px rgba(255, 100, 60, 0.15);
       }
 
       /* scoop occupies a larger fraction of the inner circle */
@@ -396,9 +388,10 @@
         width: 12%;
         height: auto;
         transition: transform 800ms cubic-bezier(0.34, 1.26, 0.64, 1),
-          opacity 500ms ease, filter 400ms ease;
+          opacity 500ms ease,
+          filter 400ms ease;
         filter: drop-shadow(0 6px 18px rgba(255, 140, 80, 0.3))
-          drop-shadow(0 0 15px rgba(255, 180, 120, 0.2));
+                drop-shadow(0 0 15px rgba(255, 180, 120, 0.2));
       }
 
       .peach-slice img {
@@ -459,23 +452,23 @@
 
       .peach-slice {
         transition: transform 800ms cubic-bezier(0.34, 1.26, 0.64, 1),
-          opacity 500ms ease, filter 400ms ease;
+          opacity 500ms ease,
+          filter 400ms ease;
         filter: drop-shadow(0 6px 18px rgba(255, 140, 80, 0.3))
-          drop-shadow(0 0 15px rgba(255, 180, 120, 0.2));
+                drop-shadow(0 0 15px rgba(255, 180, 120, 0.2));
         transform-origin: center;
         z-index: 6;
       }
       /* enhanced shadow and glow when slices move */
       .peach-slice.moving {
         filter: drop-shadow(0 14px 30px rgba(255, 140, 80, 0.45))
-          drop-shadow(0 0 25px rgba(255, 180, 120, 0.35));
+                drop-shadow(0 0 25px rgba(255, 180, 120, 0.35));
       }
 
       /* scoop image idle bob (applies to the inner image so container transforms are free)
          disabled when prefers-reduced-motion */
       @keyframes scoop-bob {
-        0%,
-        100% {
+        0%, 100% {
           transform: translateY(0px) rotate(0deg);
         }
         25% {
@@ -499,8 +492,7 @@
 
       /* stronger wobble while orbiting */
       @keyframes scoop-wobble {
-        0%,
-        100% {
+        0%, 100% {
           transform: translateY(0px) rotate(0deg);
         }
         25% {
@@ -544,9 +536,9 @@
       .image-section.assembled .icecream-scoop {
         transform: scale(1.06);
         box-shadow: 0 25px 70px rgba(255, 140, 80, 0.55),
-          0 0 40px rgba(255, 180, 120, 0.4);
+                    0 0 40px rgba(255, 180, 120, 0.4);
         transition: transform 550ms cubic-bezier(0.34, 1.56, 0.64, 1),
-          box-shadow 550ms ease;
+                    box-shadow 550ms ease;
       }
 
       /* reduced motion fallback */
@@ -608,14 +600,14 @@
         height: 86%;
         border: 2px solid rgba(255, 200, 150, 0.35);
         box-shadow: 0 0 25px rgba(255, 180, 120, 0.15),
-          inset 0 0 20px rgba(255, 220, 180, 0.08);
+                    inset 0 0 20px rgba(255, 220, 180, 0.08);
       }
       .rotor .ring-2 {
         width: 66%;
         height: 66%;
         border: 1.5px solid rgba(255, 160, 120, 0.3);
         box-shadow: 0 0 20px rgba(255, 140, 100, 0.12),
-          inset 0 0 15px rgba(255, 200, 150, 0.06);
+                    inset 0 0 15px rgba(255, 200, 150, 0.06);
         backdrop-filter: blur(6px);
       }
       .rotor .ring-3 {
@@ -623,7 +615,7 @@
         height: 46%;
         border: 1px solid rgba(255, 180, 140, 0.25);
         box-shadow: 0 0 15px rgba(255, 160, 100, 0.1),
-          inset 0 0 10px rgba(255, 220, 180, 0.05);
+                    inset 0 0 10px rgba(255, 220, 180, 0.05);
         backdrop-filter: blur(4px);
       }
       /* animations: paused by default, enabled when .rotating is added */
@@ -668,22 +660,22 @@
         animation-duration: 450ms !important;
         transform-origin: 50% 50%;
         transition: transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1),
-          box-shadow 450ms ease;
+                    box-shadow 450ms ease;
       }
       .rotor.spinburst .ring-1 {
         transform: translate(-50%, -50%) scale(1.08);
         box-shadow: 0 0 40px rgba(255, 180, 120, 0.4),
-          inset 0 0 30px rgba(255, 220, 180, 0.15);
+                    inset 0 0 30px rgba(255, 220, 180, 0.15);
       }
       .rotor.spinburst .ring-2 {
         transform: translate(-50%, -50%) scale(1.06);
         box-shadow: 0 0 35px rgba(255, 140, 100, 0.35),
-          inset 0 0 25px rgba(255, 200, 150, 0.12);
+                    inset 0 0 25px rgba(255, 200, 150, 0.12);
       }
       .rotor.spinburst .ring-3 {
         transform: translate(-50%, -50%) scale(1.04);
         box-shadow: 0 0 30px rgba(255, 160, 100, 0.3),
-          inset 0 0 20px rgba(255, 220, 180, 0.1);
+                    inset 0 0 20px rgba(255, 220, 180, 0.1);
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -865,37 +857,112 @@
           margin: -10px;
         }
 
-        /* Auto-trigger animation on mobile after load */
-        .image-section.mobile-auto-animate .peach-slice {
-          animation: mobile-slice-intro 2s ease-out forwards;
+        /* Smooth staggered entrance animation for mobile */
+        .peach-slice {
+          opacity: 0;
+          transform: scale(0.3) translateY(20px);
         }
 
-        @keyframes mobile-slice-intro {
+        .image-section.mobile-loaded .peach-slice {
+          animation: mobile-slice-float 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes mobile-slice-float {
           0% {
-            transform: scale(0) rotate(0deg);
             opacity: 0;
+            transform: scale(0.3) translateY(20px) rotate(-10deg);
           }
-          60% {
-            transform: scale(1.15) rotate(5deg);
+          70% {
             opacity: 1;
+            transform: scale(1.08) translateY(-5px) rotate(2deg);
           }
           100% {
-            transform: scale(1) rotate(0deg);
             opacity: 1;
+            transform: scale(1) translateY(0) rotate(0deg);
           }
         }
 
-        .image-section.mobile-auto-animate .peach-slice:nth-child(2) {
+        /* Stagger the slices */
+        .image-section.mobile-loaded .slice-1 {
           animation-delay: 0.1s;
         }
-        .image-section.mobile-auto-animate .peach-slice:nth-child(3) {
-          animation-delay: 0.2s;
+        .image-section.mobile-loaded .slice-2 {
+          animation-delay: 0.25s;
         }
-        .image-section.mobile-auto-animate .peach-slice:nth-child(4) {
-          animation-delay: 0.3s;
-        }
-        .image-section.mobile-auto-animate .peach-slice:nth-child(5) {
+        .image-section.mobile-loaded .slice-3 {
           animation-delay: 0.4s;
+        }
+        .image-section.mobile-loaded .slice-4 {
+          animation-delay: 0.55s;
+        }
+
+        /* Mobile tap state - gentle pulse */
+        .image-section.mobile-tapped .icecream-scoop {
+          animation: mobile-scoop-pulse 0.6s ease-out;
+        }
+
+        @keyframes mobile-scoop-pulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+
+        /* Mobile swipe hint - subtle glow pulse */
+        .image-section.show-hint::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255, 200, 150, 0.3) 0%, transparent 70%);
+          animation: mobile-hint-pulse 2s ease-in-out 3;
+          pointer-events: none;
+          z-index: 10;
+        }
+
+        @keyframes mobile-hint-pulse {
+          0%, 100% {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.1);
+          }
+        }
+
+        /* Slice wiggle on mobile for interactivity hint */
+        .image-section.show-hint .peach-slice {
+          animation: mobile-slice-wiggle 0.8s ease-in-out 2;
+          animation-delay: 1s;
+        }
+
+        @keyframes mobile-slice-wiggle {
+          0%, 100% {
+            transform: rotate(0deg);
+          }
+          25% {
+            transform: rotate(3deg);
+          }
+          75% {
+            transform: rotate(-3deg);
+          }
+        }
+
+        /* Smooth drag interaction feedback */
+        .image-section.dragging .peach-slice {
+          transition: transform 0.1s ease-out;
+          will-change: transform;
+        }
+
+        /* Active touch glow */
+        .image-section.mobile-active .inner-circle {
+          box-shadow: 0 20px 70px rgba(255, 140, 80, 0.35),
+                      0 8px 30px rgba(0, 0, 0, 0.15),
+                      0 0 60px rgba(255, 180, 120, 0.25);
+          transition: box-shadow 0.3s ease;
         }
       }
 
@@ -1262,6 +1329,124 @@
           assembleIntoScoop();
         }
       });
+
+      // Mobile: Add touch support and auto-animate on load
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      if (isTouchDevice) {
+        // Smooth entrance animation
+        setTimeout(() => {
+          section.classList.add('mobile-loaded');
+        }, 300);
+
+        // Show interaction hint after entrance
+        setTimeout(() => {
+          section.classList.add('show-hint');
+          setTimeout(() => section.classList.remove('show-hint'), 3000);
+        }, 2000);
+
+        // Touch drag interaction for rotating slices
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isDragging = false;
+        let currentRotation = 0;
+
+        section.addEventListener('touchstart', (e) => {
+          if (e.target.closest('.icecream-scoop')) return;
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          isDragging = true;
+          section.classList.add('dragging', 'mobile-active');
+        }, { passive: true });
+
+        section.addEventListener('touchmove', (e) => {
+          if (!isDragging || prefersReduced) return;
+          
+          const touchX = e.touches[0].clientX;
+          const touchY = e.touches[0].clientY;
+          const deltaX = touchX - touchStartX;
+          const deltaY = touchY - touchStartY;
+          
+          // Calculate rotation based on touch movement
+          const angle = Math.atan2(deltaY, deltaX);
+          currentRotation = angle * (180 / Math.PI);
+          
+          // Rotate slices smoothly based on drag
+          slices.forEach((slice, i) => {
+            const baseRotation = i * 90;
+            const offset = currentRotation * 0.5;
+            slice.style.transform = `rotate(${baseRotation + offset}deg) translateY(-5px) scale(1.02)`;
+          });
+
+          // Start rotor
+          if (rotor) rotor.classList.add('rotating');
+        }, { passive: true });
+
+        section.addEventListener('touchend', () => {
+          if (!isDragging) return;
+          isDragging = false;
+          section.classList.remove('dragging');
+          
+          // Smooth return to original positions
+          slices.forEach((slice) => {
+            slice.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            slice.style.transform = '';
+          });
+          
+          setTimeout(() => {
+            section.classList.remove('mobile-active');
+            if (rotor) rotor.classList.remove('rotating');
+            slices.forEach((slice) => {
+              slice.style.transition = '';
+            });
+          }, 600);
+        }, { passive: true });
+
+        // Tap scoop to trigger assembly with haptic feedback
+        let touchStartTime = 0;
+        scoop.addEventListener('touchstart', (e) => {
+          touchStartTime = Date.now();
+          section.classList.add('mobile-tapped');
+          // Vibration feedback if available
+          if (navigator.vibrate) {
+            navigator.vibrate(50);
+          }
+        }, { passive: true });
+
+        scoop.addEventListener('touchend', (e) => {
+          const touchDuration = Date.now() - touchStartTime;
+          if (touchDuration < 500) {
+            e.preventDefault();
+            assembleIntoScoop();
+            // Double vibration for assembly
+            if (navigator.vibrate) {
+              navigator.vibrate([50, 100, 50]);
+            }
+          }
+          setTimeout(() => {
+            section.classList.remove('mobile-tapped');
+          }, 600);
+        });
+
+        // Double tap anywhere to reset (mobile-friendly)
+        let lastTap = 0;
+        section.addEventListener('touchend', (e) => {
+          const currentTime = Date.now();
+          const tapLength = currentTime - lastTap;
+          if (tapLength < 300 && tapLength > 0) {
+            // Double tap detected
+            resetSlices();
+            slices.forEach((slice) => {
+              slice.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease';
+              slice.style.transform = '';
+              slice.style.opacity = '';
+            });
+            if (navigator.vibrate) {
+              navigator.vibrate(30);
+            }
+          }
+          lastTap = currentTime;
+        }, { passive: true });
+      }
     })();
   </script>
   <script>
