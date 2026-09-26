@@ -1,1351 +1,460 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Peach Ice Cream</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ed765d" />
+    <meta name="description" content="A playful scroll-driven 3D story for small-batch peach ice cream." />
+    <title>Peachy — a scoop of summer</title>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+      @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap");
 
-      body {
-        font-family: "Georgia", serif;
-        overflow: hidden;
-      }
       :root {
-        --g1: 255, 200, 150; /* warm peach */
-        --g2: 255, 140, 100; /* vibrant coral */
-        --g3: 255, 180, 140; /* soft peach-coral */
-        --g4: 255, 220, 180; /* creamy peach */
-        --accent1: 255, 160, 100; /* bright accent */
-        --accent2: 255, 190, 130; /* mid accent */
+        --ink: #351810;
+        --cream: #fff4df;
+        --peach: #f39a73;
+        --coral: #e75f4d;
+        --sun: #ffc74f;
+        --leaf: #1f5a42;
+        --progress: 0;
+        --light-x: 22%;
+        --ring-scale: .9;
+        --rx: 0deg;
+        --ry: 0deg;
+        color-scheme: light;
       }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: #ed765d;
+        color: var(--cream);
+        font-family: "DM Sans", system-ui, sans-serif;
+        overflow-x: hidden;
+      }
+      button, a { font: inherit; }
+      a { color: inherit; }
+      ::selection { background: var(--sun); color: var(--ink); }
 
-      /* full-page animated gradient behind everything - warmer peach tones */
-      .bg-gradient {
+      .site-header {
         position: fixed;
-        inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        background: linear-gradient(
-          135deg,
-          rgba(var(--g1), 1) 0%,
-          rgba(var(--g2), 1) 30%,
-          rgba(var(--g3), 1) 65%,
-          rgba(var(--g4), 1) 100%
-        );
-        background-size: 300% 300%;
-        animation: gradient-shift 20s ease-in-out infinite;
-        transition: opacity 0.4s linear;
-      }
-
-      @keyframes gradient-shift {
-        0% {
-          background-position: 0% 50%;
-        }
-        33% {
-          background-position: 100% 50%;
-        }
-        66% {
-          background-position: 50% 100%;
-        }
-        100% {
-          background-position: 0% 50%;
-        }
-      }
-      /* subtle grain / film look using a tiny inline SVG data URI */
-      .bg-gradient::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        mix-blend-mode: soft-light;
-        opacity: 0.06;
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.6"/></svg>');
-      }
-
-      .bg-blobs {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 1;
-      }
-      .bg-blob {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(70px) saturate(110%);
-        opacity: 0.16;
-        transform: translate3d(0, 0, 0);
-      }
-      .bg-blob.b1 {
-        width: 640px;
-        height: 640px;
-        left: 8%;
-        top: 10%;
-        background: radial-gradient(
-          circle at 30% 30%,
-          rgba(255, 180, 120, 0.4),
-          rgba(255, 200, 150, 0.05)
-        );
-        animation: blob-float-1 16s ease-in-out infinite;
-      }
-      .bg-blob.b2 {
-        width: 520px;
-        height: 520px;
-        right: 6%;
-        top: 18%;
-        background: radial-gradient(
-          circle at 40% 40%,
-          rgba(255, 140, 100, 0.45),
-          rgba(255, 160, 100, 0.04)
-        );
-        animation: blob-float-2 20s ease-in-out infinite;
-      }
-      .bg-blob.b3 {
-        width: 760px;
-        height: 760px;
-        left: 20%;
-        bottom: 6%;
-        background: radial-gradient(
-          circle at 30% 40%,
-          rgba(255, 190, 130, 0.5),
-          rgba(255, 220, 180, 0.02)
-        );
-        animation: blob-float-3 24s ease-in-out infinite;
-      }
-
-      @keyframes blob-float-1 {
-        0%, 100% {
-          transform: translate(0, 0) scale(1);
-        }
-        33% {
-          transform: translate(-15px, -30px) scale(1.05);
-        }
-        66% {
-          transform: translate(20px, -20px) scale(0.98);
-        }
-      }
-      @keyframes blob-float-2 {
-        0%, 100% {
-          transform: translate(0, 0) scale(1);
-        }
-        40% {
-          transform: translate(15px, -25px) scale(1.03);
-        }
-        80% {
-          transform: translate(-10px, -15px) scale(1.02);
-        }
-      }
-      @keyframes blob-float-3 {
-        0%, 100% {
-          transform: translate(0, 0) scale(1);
-        }
-        50% {
-          transform: translate(-20px, -35px) scale(1.04);
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        .bg-blob {
-          animation: none !important;
-        }
-        .bg-gradient {
-          transition: none !important;
-        }
-      }
-
-      .container {
-        width: 100vw;
-        height: 100vh;
-        background: linear-gradient(135deg, 
-          rgba(255, 200, 150, 0.3) 0%, 
-          rgba(255, 180, 140, 0.2) 100%);
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .header {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        padding: 20px 40px;
+        inset: 0 0 auto;
+        z-index: 40;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        background: rgba(255, 255, 255, 0.1);
+        padding: 22px clamp(22px, 5vw, 76px);
+        mix-blend-mode: difference;
+        color: white;
       }
-
-      .nav-arrows {
-        display: flex;
-        gap: 15px;
+      .brand {
+        display: inline-flex;
         align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: -.03em;
       }
-
-      .arrow {
-        width: 35px;
-        height: 35px;
+      .brand-mark {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border: 1px solid currentColor;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 20px;
-        color: white;
-      }
-
-      .logo {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-      }
-
-      .header-right {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 14px;
-      }
-
-      .main-content {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        max-width: 1400px;
-        padding: 0 80px;
-        gap: 80px;
-      }
-
-      .text-section {
-        color: white;
-        max-width: 400px;
-        flex-shrink: 0;
-      }
-
-      .text-section h1 {
-        font-size: 52px;
-        margin-bottom: 5px;
-        font-weight: normal;
-      }
-
-      .text-section h2 {
-        font-size: 72px;
+        font-family: "DM Serif Display", serif;
         font-style: italic;
-        margin-bottom: 30px;
-        font-weight: normal;
-        line-height: 1;
       }
+      .header-note { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
 
-      .text-section p {
-        font-size: 17px;
-        line-height: 1.8;
-        color: rgba(255, 255, 255, 0.95);
-        font-family: Arial, sans-serif;
-      }
-
-      /* scale the image section to roughly 2/3 of the viewport width (responsive) */
-      .image-section {
-        position: relative;
-        /* aim for ~66% of viewport width but constrain for very wide/small screens */
-        width: min(66vw, 920px);
-        height: min(66vw, 920px);
-        flex-shrink: 0;
-      }
-
-      .background-circle {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        background: radial-gradient(
-          circle at 35% 30%,
-          rgba(255, 220, 180, 0.12),
-          rgba(255, 180, 140, 0.06) 30%,
-          rgba(255, 160, 120, 0.03) 50%,
-          transparent 65%
-        );
+      .story { height: 500vh; position: relative; }
+      .stage {
+        position: sticky;
         top: 0;
-        left: 0;
-        z-index: 1;
-        /* subtle animated breathing and slow rotation */
-        transform-origin: 50% 50%;
-        animation: bg-breathe 9s ease-in-out infinite,
-          bg-rotate 32s linear infinite;
-        will-change: transform;
-        transition: transform 400ms cubic-bezier(0.34, 1.26, 0.64, 1);
-      }
-
-      @keyframes bg-breathe {
-        0%, 100% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.04);
-        }
-      }
-      @keyframes bg-rotate {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      /* inner circle scales with the image-section for consistent proportions */
-      .inner-circle {
-        position: absolute;
-        width: 72%;
-        height: 72%;
-        max-width: 720px;
-        max-height: 720px;
-        border-radius: 50%;
-        /* enhanced gradient with warmer peach tones */
-        background: linear-gradient(
-          145deg,
-          rgba(255, 220, 180, 0.95) 0%,
-          rgba(255, 180, 140, 0.92) 35%,
-          rgba(255, 160, 120, 0.9) 70%,
-          rgba(255, 140, 100, 0.88) 100%
-        );
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 20px 70px rgba(255, 140, 80, 0.25),
-                    0 8px 30px rgba(0, 0, 0, 0.15);
-        overflow: visible;
-      }
-
-      /* layered inner elements: glass plate and solid core */
-      .inner-plate {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        width: 92%;
-        height: 92%;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 2;
-        background: rgba(255, 240, 220, 0.06);
-        border: 1px solid rgba(255, 200, 150, 0.25);
-        backdrop-filter: blur(8px);
-        box-shadow: inset 0 2px 0 rgba(255, 220, 180, 0.12),
-                    0 0 20px rgba(255, 180, 120, 0.08);
-      }
-      .inner-core {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        width: 78%;
-        height: 78%;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 1;
-        background: linear-gradient(135deg,
-          rgba(255, 180, 140, 0.85) 0%,
-          rgba(255, 160, 120, 0.9) 50%,
-          rgba(255, 140, 100, 0.95) 100%);
-        box-shadow: 0 12px 35px rgba(255, 140, 80, 0.2),
-                    inset 0 -3px 10px rgba(255, 100, 60, 0.15);
-      }
-
-      /* scoop occupies a larger fraction of the inner circle */
-      .icecream-scoop {
-        width: 58%;
-        height: 58%;
-        min-width: 220px;
-        min-height: 220px;
-        border-radius: 50%;
+        height: 100vh;
+        min-height: 620px;
         overflow: hidden;
-        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.32);
+        isolation: isolate;
+        background:
+          radial-gradient(circle at var(--light-x) 25%, rgba(255,235,190,.7), transparent 28%),
+          linear-gradient(135deg, #f8ae80 0%, #eb735e 52%, #d94c43 100%);
       }
-
-      .icecream-scoop img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-
-      /* slices use percentages so they scale with the image-section */
-      .peach-slice {
-        position: absolute;
-        width: 12%;
-        height: auto;
-        transition: transform 800ms cubic-bezier(0.34, 1.26, 0.64, 1),
-          opacity 500ms ease,
-          filter 400ms ease;
-        filter: drop-shadow(0 6px 18px rgba(255, 140, 80, 0.3))
-                drop-shadow(0 0 15px rgba(255, 180, 120, 0.2));
-      }
-
-      .peach-slice img {
-        width: 180%;
-        height: 180%;
-        object-fit: cover;
-        display: block;
-      }
-
-      /* position tweaks in percentages for scaled layout */
-      .slice-1 {
-        top: 12%;
-        left: 6%;
-      }
-      .slice-2 {
-        bottom: 12%;
-        left: 10%;
-      }
-      .slice-3 {
-        top: 12%;
-        right: 6%;
-      }
-      .slice-4 {
-        bottom: 12%;
-        right: 8%;
-      }
-
-      .nav-button {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 60px;
-        color: white;
-        cursor: pointer;
-        z-index: 20;
-        opacity: 0.6;
-        transition: opacity 0.3s;
-        user-select: none;
-      }
-
-      .nav-button:hover {
-        opacity: 1;
-      }
-
-      .nav-left {
-        left: 30px;
-      }
-      /* Scoop & slice animation styles (non-destructive additions) */
-      .image-section {
-        --scoop-radius: 140px;
-      }
-      .icecream-scoop {
-        position: relative;
-        z-index: 5;
-        /* container transforms will be applied from JS to avoid conflicts */
-        transition: transform 260ms cubic-bezier(0.2, 0.9, 0.2, 1);
-      }
-
-      .peach-slice {
-        transition: transform 800ms cubic-bezier(0.34, 1.26, 0.64, 1),
-          opacity 500ms ease,
-          filter 400ms ease;
-        filter: drop-shadow(0 6px 18px rgba(255, 140, 80, 0.3))
-                drop-shadow(0 0 15px rgba(255, 180, 120, 0.2));
-        transform-origin: center;
-        z-index: 6;
-      }
-      /* enhanced shadow and glow when slices move */
-      .peach-slice.moving {
-        filter: drop-shadow(0 14px 30px rgba(255, 140, 80, 0.45))
-                drop-shadow(0 0 25px rgba(255, 180, 120, 0.35));
-      }
-
-      /* scoop image idle bob (applies to the inner image so container transforms are free)
-         disabled when prefers-reduced-motion */
-      @keyframes scoop-bob {
-        0%, 100% {
-          transform: translateY(0px) rotate(0deg);
-        }
-        25% {
-          transform: translateY(-8px) rotate(-1deg);
-        }
-        50% {
-          transform: translateY(0px) rotate(0deg);
-        }
-        75% {
-          transform: translateY(4px) rotate(0.5deg);
-        }
-      }
-      .icecream-scoop img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        will-change: transform;
-        animation: scoop-bob 7s ease-in-out infinite;
-        transform-origin: 50% 50%;
-      }
-
-      /* stronger wobble while orbiting */
-      @keyframes scoop-wobble {
-        0%, 100% {
-          transform: translateY(0px) rotate(0deg);
-        }
-        25% {
-          transform: translateY(-12px) rotate(-1.8deg);
-        }
-        50% {
-          transform: translateY(2px) rotate(0deg);
-        }
-        75% {
-          transform: translateY(6px) rotate(1.2deg);
-        }
-      }
-      .image-section.orbiting .icecream-scoop img {
-        animation: scoop-wobble 1400ms ease-in-out infinite;
-      }
-
-      /* pop effect when assembling */
-      @keyframes scoop-pop {
-        0% {
-          transform: scale(1);
-        }
-        30% {
-          transform: scale(1.18);
-        }
-        60% {
-          transform: scale(0.96);
-        }
-        100% {
-          transform: scale(1);
-        }
-      }
-      .icecream-scoop.pop img {
-        animation: scoop-pop 550ms cubic-bezier(0.34, 1.56, 0.64, 1);
-      }
-
-      /* assembled state when slices merge into scoop */
-      .image-section.assembled .peach-slice {
-        transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1),
-          opacity 400ms ease;
-      }
-      .image-section.assembled .icecream-scoop {
-        transform: scale(1.06);
-        box-shadow: 0 25px 70px rgba(255, 140, 80, 0.55),
-                    0 0 40px rgba(255, 180, 120, 0.4);
-        transition: transform 550ms cubic-bezier(0.34, 1.56, 0.64, 1),
-                    box-shadow 550ms ease;
-      }
-
-      /* reduced motion fallback */
-      @media (prefers-reduced-motion: reduce) {
-        .peach-slice,
-        .icecream-scoop {
-          transition: none !important;
-          transform: none !important;
-        }
-      }
-      /* rotor rings styling */
-      .rotor {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        /* scale rotor relative to inner-circle for consistent proportions */
-        width: 86%;
-        height: 86%;
-        pointer-events: none;
-        z-index: 3;
-      }
-
-      /* full-page interactive light (follows cursor) */
-      #page-light {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 2;
-        mix-blend-mode: screen;
-        opacity: 0.8;
-      }
-      #page-light::before {
+      .stage::before {
         content: "";
         position: absolute;
         inset: 0;
-        background: radial-gradient(
-          circle at var(--lx, 50%) var(--ly, 50%),
-          rgba(255, 220, 180, 0.18),
-          rgba(255, 180, 140, 0.08) 25%,
-          rgba(255, 160, 120, 0.04) 45%,
-          transparent 65%
-        );
-        filter: blur(60px);
-        transition: opacity 350ms ease-out;
+        z-index: -2;
+        opacity: .14;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+        mix-blend-mode: soft-light;
+        pointer-events: none;
       }
-      .rotor .ring {
+      .stage::after {
+        content: "";
         position: absolute;
+        width: 48vw;
+        aspect-ratio: 1;
         left: 50%;
         top: 50%;
-        transform: translate(-50%, -50%);
+        z-index: -1;
+        border: 1px solid rgba(255,255,255,.22);
         border-radius: 50%;
-        box-sizing: border-box;
-        background: rgba(255, 255, 255, 0.04);
-        backdrop-filter: blur(8px);
+        transform: translate(-50%, -50%) scale(var(--ring-scale));
+        box-shadow: 0 0 0 8vw rgba(255,255,255,.025), 0 0 0 16vw rgba(255,255,255,.018);
       }
-      .rotor .ring-1 {
-        width: 86%;
-        height: 86%;
-        border: 2px solid rgba(255, 200, 150, 0.35);
-        box-shadow: 0 0 25px rgba(255, 180, 120, 0.15),
-                    inset 0 0 20px rgba(255, 220, 180, 0.08);
+      .ambient { position: absolute; border-radius: 50%; filter: blur(2px); pointer-events: none; }
+      .ambient.one { width: 28vw; height: 28vw; left: -8vw; bottom: -8vw; background: rgba(255,206,91,.32); }
+      .ambient.two { width: 20vw; height: 20vw; right: -5vw; top: 8vh; background: rgba(113,35,41,.18); }
+
+      .visual-wrap {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        display: grid;
+        place-items: center;
+        pointer-events: none;
+        perspective: 1200px;
+        transform-style: preserve-3d;
       }
-      .rotor .ring-2 {
-        width: 66%;
-        height: 66%;
-        border: 1.5px solid rgba(255, 160, 120, 0.3);
-        box-shadow: 0 0 20px rgba(255, 140, 100, 0.12),
-                    inset 0 0 15px rgba(255, 200, 150, 0.06);
-        backdrop-filter: blur(6px);
+      .product-scene {
+        position: relative;
+        width: min(45vw, 660px);
+        aspect-ratio: 1;
+        transform-style: preserve-3d;
+        will-change: transform;
+        transform: translate3d(var(--tx, 12vw), var(--ty, 0), var(--tz, 0)) rotateX(calc(var(--xrot, 0deg) + var(--rx))) rotateY(calc(var(--yrot, 0deg) + var(--ry))) rotateZ(var(--zrot, -8deg)) scale(var(--scale, 1));
+        filter: drop-shadow(0 36px 48px rgba(76, 24, 14, .28));
       }
-      .rotor .ring-3 {
-        width: 46%;
-        height: 46%;
-        border: 1px solid rgba(255, 180, 140, 0.25);
-        box-shadow: 0 0 15px rgba(255, 160, 100, 0.1),
-                    inset 0 0 10px rgba(255, 220, 180, 0.05);
-        backdrop-filter: blur(4px);
+      .halo {
+        position: absolute;
+        inset: 7%;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 26%, rgba(255,255,255,.8), rgba(255,208,142,.22) 40%, rgba(117,31,24,.1) 72%, transparent 73%);
+        border: 1px solid rgba(255,255,255,.42);
+        box-shadow: inset -30px -30px 80px rgba(139,38,25,.14), inset 20px 20px 44px rgba(255,255,255,.2);
+        transform: translateZ(-45px);
       }
-      /* animations: paused by default, enabled when .rotating is added */
-      @keyframes spin {
-        from {
-          transform: translate(-50%, -50%) rotate(0deg);
-        }
-        to {
-          transform: translate(-50%, -50%) rotate(360deg);
-        }
+      .shadow {
+        position: absolute;
+        width: 58%;
+        height: 17%;
+        left: 23%;
+        bottom: 4%;
+        border-radius: 50%;
+        background: rgba(74, 22, 15, .34);
+        filter: blur(26px);
+        transform: translateZ(-100px) rotateX(72deg);
       }
-      @keyframes spin-reverse {
-        from {
-          transform: translate(-50%, -50%) rotate(360deg);
-        }
-        to {
-          transform: translate(-50%, -50%) rotate(0deg);
-        }
+      .scoop-shell {
+        position: absolute;
+        width: 63%;
+        aspect-ratio: 1;
+        left: 18.5%;
+        top: 15%;
+        border-radius: 50%;
+        transform-style: preserve-3d;
+        transform: translateZ(75px);
       }
-      .rotor .ring {
-        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        animation-iteration-count: infinite;
-        animation-play-state: paused;
+      .scoop-shell::after {
+        content: "";
+        position: absolute;
+        inset: 5%;
+        border-radius: 50%;
+        background: radial-gradient(circle at 33% 22%, rgba(255,255,255,.54), transparent 24%), linear-gradient(140deg, transparent 50%, rgba(125,42,30,.2));
+        mix-blend-mode: soft-light;
       }
-      .rotor .ring-1 {
-        animation-name: spin;
-        animation-duration: 30s;
+      .scoop { width: 100%; height: 100%; object-fit: contain; transform: translateZ(30px); filter: saturate(1.08) contrast(1.03); }
+      .slice {
+        position: absolute;
+        z-index: 4;
+        width: 20%;
+        transform-style: preserve-3d;
+        filter: drop-shadow(0 12px 13px rgba(91,30,11,.28));
+        will-change: transform;
       }
-      .rotor .ring-2 {
-        animation-name: spin-reverse;
-        animation-duration: 20s;
+      .slice img { display: block; width: 100%; }
+      .slice.a { left: 3%; top: 15%; transform: translate3d(var(--dx, 0), var(--dy, 0), 110px) rotate(-28deg); }
+      .slice.b { right: 0; top: 18%; transform: translate3d(var(--dx, 0), var(--dy, 0), 45px) rotate(34deg) scale(.82); }
+      .slice.c { left: 6%; bottom: 13%; transform: translate3d(var(--dx, 0), var(--dy, 0), 20px) rotate(17deg) scale(.74); }
+      .slice.d { right: 5%; bottom: 8%; transform: translate3d(var(--dx, 0), var(--dy, 0), 125px) rotate(-17deg) scale(1.08); }
+      .leaf {
+        position: absolute;
+        width: 18%;
+        height: 9%;
+        right: 16%;
+        top: 14%;
+        border-radius: 100% 0 100% 0;
+        background: linear-gradient(145deg, #397d55, #174b36);
+        transform: translateZ(130px) rotate(-28deg);
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.2), 0 12px 20px rgba(35,73,50,.2);
       }
-      .rotor .ring-3 {
-        animation-name: spin;
-        animation-duration: 12s;
+      .leaf::after { content: ""; position: absolute; width: 72%; height: 1px; left: 12%; top: 50%; background: rgba(255,255,255,.38); transform: rotate(-24deg); }
+
+      .chapters { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+      .chapter {
+        position: absolute;
+        width: min(38vw, 520px);
+        left: clamp(24px, 7vw, 112px);
+        top: 50%;
+        opacity: 0;
+        transform: translateY(calc(-42% + 36px));
+        transition: opacity .45s ease, transform .6s cubic-bezier(.2,.7,.2,1);
       }
-      .rotor.rotating .ring {
-        animation-play-state: running;
+      .chapter:nth-child(even) { left: auto; right: clamp(24px, 7vw, 112px); text-align: right; }
+      .chapter.active { opacity: 1; transform: translateY(-50%); }
+      .kicker { margin: 0 0 14px; font-size: 11px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+      .chapter h1, .chapter h2 {
+        margin: 0;
+        font-family: "DM Serif Display", Georgia, serif;
+        font-size: clamp(55px, 7vw, 112px);
+        font-weight: 400;
+        line-height: .88;
+        letter-spacing: -.055em;
       }
-      /* spinburst temporarily speeds up and scales rings */
-      .rotor.spinburst .ring {
-        animation-duration: 450ms !important;
-        transform-origin: 50% 50%;
-        transition: transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1),
-                    box-shadow 450ms ease;
+      .chapter h1 em, .chapter h2 em { display: block; color: #ffe9a8; font-weight: 400; }
+      .chapter p:not(.kicker) { max-width: 420px; margin: 24px 0 0; font-size: clamp(15px, 1.25vw, 19px); line-height: 1.65; color: rgba(255,255,255,.86); }
+      .chapter:nth-child(even) p:not(.kicker) { margin-left: auto; }
+      .facts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 25px; }
+      .chapter:nth-child(even) .facts { justify-content: flex-end; }
+      .fact { padding: 8px 12px; border: 1px solid rgba(255,255,255,.36); border-radius: 99px; background: rgba(255,255,255,.1); backdrop-filter: blur(8px); font-size: 12px; }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 28px;
+        padding: 13px 18px;
+        border: 0;
+        border-radius: 99px;
+        background: var(--cream);
+        color: var(--ink);
+        text-decoration: none;
+        font-weight: 700;
+        pointer-events: auto;
+        box-shadow: 0 12px 30px rgba(90,26,14,.15);
+        transition: transform .2s ease, box-shadow .2s ease;
       }
-      .rotor.spinburst .ring-1 {
-        transform: translate(-50%, -50%) scale(1.08);
-        box-shadow: 0 0 40px rgba(255, 180, 120, 0.4),
-                    inset 0 0 30px rgba(255, 220, 180, 0.15);
+      .cta:hover { transform: translateY(-3px); box-shadow: 0 16px 38px rgba(90,26,14,.23); }
+      .cta span { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%; background: var(--sun); }
+
+      .scroll-cue {
+        position: absolute;
+        z-index: 15;
+        left: clamp(22px, 5vw, 76px);
+        bottom: 27px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        font-size: 11px;
+        letter-spacing: .16em;
+        text-transform: uppercase;
       }
-      .rotor.spinburst .ring-2 {
-        transform: translate(-50%, -50%) scale(1.06);
-        box-shadow: 0 0 35px rgba(255, 140, 100, 0.35),
-                    inset 0 0 25px rgba(255, 200, 150, 0.12);
+      .scroll-cue::before { content: ""; width: 44px; height: 1px; background: currentColor; transform-origin: left; transform: scaleX(calc(1 + var(--progress) * 2)); }
+      .scene-nav {
+        position: absolute;
+        z-index: 20;
+        right: clamp(22px, 3vw, 48px);
+        top: 50%;
+        display: grid;
+        gap: 12px;
+        transform: translateY(-50%);
       }
-      .rotor.spinburst .ring-3 {
-        transform: translate(-50%, -50%) scale(1.04);
-        box-shadow: 0 0 30px rgba(255, 160, 100, 0.3),
-                    inset 0 0 20px rgba(255, 220, 180, 0.1);
+      .scene-dot {
+        width: 9px;
+        height: 9px;
+        padding: 0;
+        border: 1px solid rgba(255,255,255,.7);
+        border-radius: 50%;
+        background: transparent;
+        cursor: pointer;
+        pointer-events: auto;
+        transition: transform .25s ease, background .25s ease;
       }
+      .scene-dot.active { background: white; transform: scale(1.55); }
+      .counter { position: absolute; right: clamp(22px, 5vw, 76px); bottom: 24px; z-index: 20; font-family: "DM Serif Display", serif; font-size: 26px; }
+      .counter small { font: 11px "DM Sans", sans-serif; opacity: .7; }
 
-      @media (prefers-reduced-motion: reduce) {
-        .rotor .ring {
-          animation: none !important;
-        }
-        .background-circle {
-          animation: none !important;
-        }
-        .peach-slice,
-        .icecream-scoop,
-        .icecream-scoop img {
-          transition: none !important;
-          animation: none !important;
-          transform: none !important;
-        }
+      .after-story {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: 1.05fr .95fr;
+        min-height: 90vh;
+        padding: clamp(70px, 10vw, 150px) clamp(24px, 8vw, 130px);
+        background: var(--cream);
+        color: var(--ink);
       }
+      .after-story h2 { max-width: 700px; margin: 0; font: 400 clamp(48px, 7vw, 100px)/.92 "DM Serif Display", serif; letter-spacing: -.05em; }
+      .after-story h2 em { color: var(--coral); }
+      .details { align-self: end; max-width: 520px; padding-top: 120px; }
+      .details > p { font-size: 18px; line-height: 1.7; color: #6d4639; }
+      .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 34px; }
+      .detail-card { padding: 18px 14px; border-top: 1px solid #d9bca6; }
+      .detail-card strong { display: block; font: 34px "DM Serif Display", serif; }
+      .detail-card span { color: #8a6254; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+      footer { display: flex; justify-content: space-between; gap: 20px; padding: 24px clamp(24px, 8vw, 130px); background: var(--cream); color: #795448; border-top: 1px solid #e6ccba; font-size: 12px; }
 
-      /* Mobile Responsive Design */
-      @media (max-width: 1024px) {
-        .main-content {
-          padding: 0 40px;
-          gap: 40px;
-        }
-
-        .text-section h1 {
-          font-size: 42px;
-        }
-
-        .text-section h2 {
-          font-size: 58px;
-        }
-
-        .text-section p {
-          font-size: 16px;
-        }
-      }
-
-      @media (max-width: 768px) {
-        .header {
-          padding: 15px 20px;
-        }
-
-        .main-content {
-          flex-direction: column;
-          padding: 100px 30px 30px;
-          gap: 40px;
-          justify-content: center;
-        }
-
-        .text-section {
-          max-width: 100%;
-          text-align: center;
-        }
-
-        .text-section h1 {
-          font-size: 38px;
-        }
-
-        .text-section h2 {
-          font-size: 52px;
-          margin-bottom: 20px;
-        }
-
-        .text-section p {
-          font-size: 15px;
-          line-height: 1.6;
-        }
-
-        .image-section {
-          width: min(85vw, 500px);
-          height: min(85vw, 500px);
-        }
-
-        .nav-button {
-          display: none;
-        }
-
-        .peach-slice {
-          width: 14%;
-        }
-
-        /* Adjust slice positions for smaller screens */
-        .slice-1 {
-          top: 8%;
-          left: 4%;
-        }
-        .slice-2 {
-          bottom: 8%;
-          left: 6%;
-        }
-        .slice-3 {
-          top: 8%;
-          right: 4%;
-        }
-        .slice-4 {
-          bottom: 8%;
-          right: 6%;
-        }
-      }
-
-      @media (max-width: 480px) {
-        .header {
-          padding: 12px 15px;
-        }
-
-        .arrow {
-          width: 30px;
-          height: 30px;
-          font-size: 18px;
-        }
-
-        .logo {
-          width: 35px;
-          height: 35px;
-        }
-
-        .nav-arrows {
-          gap: 10px;
-        }
-
-        .main-content {
-          padding: 90px 20px 20px;
-          gap: 30px;
-        }
-
-        .text-section h1 {
-          font-size: 32px;
-        }
-
-        .text-section h2 {
-          font-size: 44px;
-          margin-bottom: 15px;
-        }
-
-        .text-section p {
-          font-size: 14px;
-          line-height: 1.6;
-        }
-
-        .image-section {
-          width: min(90vw, 400px);
-          height: min(90vw, 400px);
-        }
-
-        .icecream-scoop {
-          min-width: 160px;
-          min-height: 160px;
-        }
-
-        .peach-slice {
-          width: 16%;
-        }
-
-        /* Make blobs smaller on mobile for performance */
-        .bg-blob.b1 {
-          width: 400px;
-          height: 400px;
-        }
-        .bg-blob.b2 {
-          width: 350px;
-          height: 350px;
-        }
-        .bg-blob.b3 {
-          width: 450px;
-          height: 450px;
-        }
-      }
-
-      /* Landscape mobile */
-      @media (max-width: 900px) and (max-height: 500px) {
-        .main-content {
-          flex-direction: row;
-          padding: 20px;
-          gap: 30px;
-        }
-
-        .text-section {
+      @media (max-width: 820px) {
+        .header-note { display: none; }
+        .stage { min-height: 560px; }
+        .product-scene { width: min(90vw, 520px); --tx: 0vw !important; }
+        .visual-wrap { transform: translateY(-7vh); }
+        .chapter, .chapter:nth-child(even) {
+          width: calc(100% - 48px);
+          left: 24px;
+          right: auto;
+          top: auto;
+          bottom: 74px;
           text-align: left;
-          max-width: 300px;
+          transform: translateY(25px);
         }
-
-        .text-section h1 {
-          font-size: 28px;
-        }
-
-        .text-section h2 {
-          font-size: 38px;
-          margin-bottom: 10px;
-        }
-
-        .text-section p {
-          font-size: 13px;
-          line-height: 1.5;
-        }
-
-        .image-section {
-          width: min(50vw, 350px);
-          height: min(50vw, 350px);
-        }
-
-        .header {
-          padding: 10px 20px;
-        }
+        .chapter.active { transform: translateY(0); }
+        .chapter h1, .chapter h2 { font-size: clamp(48px, 15vw, 74px); }
+        .chapter p:not(.kicker) { max-width: 520px; margin: 14px 0 0; font-size: 14px; line-height: 1.5; }
+        .chapter:nth-child(even) p:not(.kicker) { margin-left: 0; }
+        .chapter:nth-child(even) .facts { justify-content: flex-start; }
+        .facts { margin-top: 13px; }
+        .fact { padding: 6px 9px; font-size: 10px; }
+        .scene-nav { display: none; }
+        .scroll-cue { bottom: 22px; }
+        .counter { bottom: 17px; }
+        .after-story { grid-template-columns: 1fr; min-height: auto; }
+        .details { padding-top: 60px; }
+      }
+      @media (max-width: 520px) {
+        .site-header { padding: 16px 18px; }
+        .visual-wrap { transform: translateY(-12vh); }
+        .product-scene { width: 112vw; }
+        .chapter { width: calc(100% - 36px); left: 18px; bottom: 68px; }
+        .chapter p:not(.kicker) { width: calc(100vw - 36px); max-width: calc(100vw - 36px); overflow-wrap: anywhere; }
+        .chapter .facts { display: none; }
+        .chapter h1, .chapter h2 { font-size: clamp(46px, 14vw, 66px); }
+        .after-story { padding: 72px 22px; }
+        .detail-grid { grid-template-columns: 1fr; }
+        footer { flex-direction: column; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        .product-scene, .chapter, .cta { transition: none !important; }
       }
     </style>
   </head>
   <body>
-    <!-- Background enhancement layers: animated gradient + large blurred blobs -->
-    <div class="bg-gradient" aria-hidden="true"></div>
-    <div class="bg-blobs" aria-hidden="true">
-      <div class="bg-blob b1"></div>
-      <div class="bg-blob b2"></div>
-      <div class="bg-blob b3"></div>
-    </div>
-    <div class="container">
-      <div class="header">
-        <div class="nav-arrows">
-          <div class="arrow">‹</div>
-          <div class="arrow">›</div>
-          <div class="logo">h</div>
-        </div>
-      </div>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Peachy home"><span class="brand-mark">P</span> Peachy</a>
+      <span class="header-note">Small batch · big summer energy</span>
+    </header>
 
-      <div class="main-content">
-        <div class="text-section">
-          <h1>Peach</h1>
-          <h2>Ice Cream</h2>
-          <p>
-            Delicate peach flavor blended into smooth, velvety ice cream for a
-            summer-perfect indulgence. Enjoy the fruity essence in creamy,
-            dreamy scoops that practically melt in your mouth, bringing a burst
-            of natural sweetness and happiness with every delightful bite.
-          </p>
-        </div>
-
-        <div class="image-section">
-          <div class="background-circle"></div>
-          <div class="inner-circle">
-            <!-- decorative rotating rings around the scoop -->
-            <div class="rotor" aria-hidden="true">
-              <div class="ring ring-1"></div>
-              <div class="ring ring-2"></div>
-              <div class="ring ring-3"></div>
-            </div>
-            <!-- glass plate and solid core inside inner-circle -->
-            <div class="inner-plate" aria-hidden="true"></div>
-            <div class="inner-core" aria-hidden="true"></div>
-            <div class="icecream-scoop">
-              <img src="scoop.png" alt="Peach Ice Cream" />
-              <div class="scoop-overlay" aria-hidden="true"></div>
+    <main id="top">
+      <section class="story" aria-label="The peach ice cream story">
+        <div class="stage">
+          <div class="ambient one"></div><div class="ambient two"></div>
+          <div class="visual-wrap" aria-hidden="true">
+            <div class="product-scene">
+              <div class="shadow"></div><div class="halo"></div><div class="leaf"></div>
+              <div class="scoop-shell"><img class="scoop" src="scoop.png" alt="" /></div>
+              <div class="slice a"><img src="peace slice.png" alt="" /></div>
+              <div class="slice b"><img src="peace slice.png" alt="" /></div>
+              <div class="slice c"><img src="peace slice.png" alt="" /></div>
+              <div class="slice d"><img src="peace slice.png" alt="" /></div>
             </div>
           </div>
 
-          <div class="peach-slice slice-1">
-            <img src="peace slice.png" alt="Peach Slice" />
+          <div class="chapters">
+            <article class="chapter active"><p class="kicker">01 · Meet your summer scoop</p><h1>Peach <em>perfected.</em></h1><p>Ripe orchard fruit folded into a slow-churned cream. Bright, velvety and unapologetically peachy.</p></article>
+            <article class="chapter"><p class="kicker">02 · Closer than close</p><h2>Texture you can <em>almost taste.</em></h2><p>Silky at first, then softly melting. Every ridge holds a little ribbon of sun-ripened peach.</p></article>
+            <article class="chapter"><p class="kicker">03 · Nothing to hide</p><h2>Real fruit. <em>Full orbit.</em></h2><p>A short ingredient list with the good stuff doing all the talking.</p><div class="facts"><span class="fact">Real peaches</span><span class="fact">Fresh cream</span><span class="fact">No artificial colour</span></div></article>
+            <article class="chapter"><p class="kicker">04 · Made with patience</p><h2>Slow churned. <em>Fast loved.</em></h2><p>Small batches keep the texture plush and the flavour vivid—from first spoon to last.</p></article>
+            <article class="chapter"><p class="kicker">05 · Your turn</p><h2>Take summer <em>with you.</em></h2><p>One scoop is a mood. Two is a plan.</p><a class="cta" href="#taste">Find your scoop <span>↗</span></a></article>
           </div>
-          <div class="peach-slice slice-2">
-            <img src="peace slice.png" alt="Peach Slice" />
+
+          <div class="scroll-cue">Scroll to explore</div>
+          <div class="scene-nav" aria-label="Jump to a scene">
+            <button class="scene-dot active" type="button" aria-label="Scene 1" data-scene="0"></button>
+            <button class="scene-dot" type="button" aria-label="Scene 2" data-scene="1"></button>
+            <button class="scene-dot" type="button" aria-label="Scene 3" data-scene="2"></button>
+            <button class="scene-dot" type="button" aria-label="Scene 4" data-scene="3"></button>
+            <button class="scene-dot" type="button" aria-label="Scene 5" data-scene="4"></button>
           </div>
-          <div class="peach-slice slice-3">
-            <img src="peace slice.png" alt="Peach Slice" />
-          </div>
-          <div class="peach-slice slice-4">
-            <img src="peace slice.png" alt="Peach Slice" />
-          </div>
+          <div class="counter"><span>01</span> <small>/ 05</small></div>
         </div>
-      </div>
+      </section>
 
-      <div class="nav-button nav-left">‹</div>
-    </div>
-  </body>
-  <script>
-    // Animation logic: move peach slices toward the scoop in a nice UX-friendly way.
-    (function () {
-      const section = document.querySelector(".image-section");
-      if (!section) return;
-      const scoop = section.querySelector(".icecream-scoop");
-      const slices = Array.from(section.querySelectorAll(".peach-slice"));
-      const rotor = section.querySelector(".rotor");
-      const scoopImg = scoop.querySelector("img");
-      const prefersReduced = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
+      <section class="after-story" id="taste">
+        <div><p class="kicker">The last spoonful</p><h2>A little fruit, a lot of <em>joy.</em></h2></div>
+        <div class="details"><p>Peachy is a concept for an expressive, modern dessert brand—built around tactile motion, natural ingredients and one unforgettable scoop.</p><div class="detail-grid"><div class="detail-card"><strong>01</strong><span>Hero flavour</span></div><div class="detail-card"><strong>5</strong><span>Scroll scenes</span></div><div class="detail-card"><strong>∞</strong><span>Summer energy</span></div></div></div>
+      </section>
+    </main>
+    <footer><span>Peachy © 2026</span><span>Concept & interaction experiment</span></footer>
 
-      // store original centers for slices so they can reliably return to their original spots
-      let originalCenters = slices.map((s) => {
-        const r = s.getBoundingClientRect();
-        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-      });
+    <script>
+      (() => {
+        const story = document.querySelector(".story");
+        const root = document.documentElement;
+        const product = document.querySelector(".product-scene");
+        const chapters = [...document.querySelectorAll(".chapter")];
+        const dots = [...document.querySelectorAll(".scene-dot")];
+        const slices = [...document.querySelectorAll(".slice")];
+        const counter = document.querySelector(".counter span");
+        const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const mobile = () => innerWidth <= 820;
+        const views = [
+          { x: 12, y: 0, z: 0, rx: 0, ry: -8, rz: -7, s: 1, e: .15 },
+          { x: -18, y: -1, z: 40, rx: -6, ry: 30, rz: 7, s: 1.34, e: .2 },
+          { x: 17, y: 0, z: -20, rx: 10, ry: -38, rz: -12, s: .92, e: 1 },
+          { x: -17, y: -1, z: 30, rx: 58, ry: 4, rz: 145, s: 1.08, e: .62 },
+          { x: 14, y: 1, z: 0, rx: 0, ry: 18, rz: 4, s: 1.04, e: .3 }
+        ];
+        const lerp = (a, b, t) => a + (b - a) * t;
+        const clamp = (n, min = 0, max = 1) => Math.min(max, Math.max(min, n));
+        let pointerX = 0, pointerY = 0, ticking = false;
 
-      // manage scoop container transform parts to avoid clobbering from different interactions
-      const scoopState = { tx: 0, ty: 0, rot: 0, scale: 1 };
-      function applyScoopTransform() {
-        scoop.style.transform = `translate(${scoopState.tx}px, ${scoopState.ty}px) rotate(${scoopState.rot}deg) scale(${scoopState.scale})`;
-      }
-      function setScoopScale(s) {
-        scoopState.scale = s;
-        applyScoopTransform();
-      }
+        function render() {
+          ticking = false;
+          const max = story.offsetHeight - innerHeight;
+          const progress = clamp((scrollY - story.offsetTop) / Math.max(1, max));
+          const exact = progress * (views.length - 1);
+          const index = Math.min(views.length - 1, Math.floor(exact + .0001));
+          const next = Math.min(views.length - 1, index + 1);
+          const t = exact - index;
+          const a = views[index], b = views[next];
+          const px = reducedMotion ? 0 : pointerX, py = reducedMotion ? 0 : pointerY;
+          const x = mobile() ? 0 : lerp(a.x, b.x, t);
 
-      function getCenterRect(el) {
-        const r = el.getBoundingClientRect();
-        return {
-          x: r.left + r.width / 2,
-          y: r.top + r.height / 2,
-          w: r.width,
-          h: r.height,
-          rect: r,
-        };
-      }
-
-      // compute target positions for N slices around the scoop
-      function computeTargets() {
-        const sc = getCenterRect(scoop);
-        const radius = Math.max(sc.w, sc.h) * 0.6 + 30; // ring radius
-        const targets = [];
-        const n = slices.length;
-        // place them around top-half nicer angles for UI
-        const baseAngles = [-70, -20, 20, 70];
-        for (let i = 0; i < n; i++) {
-          const ang =
-            baseAngles[i] !== undefined
-              ? baseAngles[i] * (Math.PI / 180)
-              : i * ((2 * Math.PI) / n);
-          const tx = sc.x + Math.cos(ang) * radius;
-          const ty = sc.y + Math.sin(ang) * radius;
-          targets.push({ x: tx, y: ty, angle: ang });
-        }
-        return { sc, targets };
-      }
-
-      let lastTargets = null;
-      // orbit state
-      let orbitRAF = null;
-      let orbitAngles = [];
-      let orbitOrigCenters = [];
-      let orbitStart = 0;
-
-      function moveSlicesToTargets() {
-        if (prefersReduced) return;
-        const { sc, targets } = computeTargets();
-        lastTargets = { sc, targets };
-        slices.forEach((slice, i) => {
-          // compute transform relative to original center so resets are consistent
-          const orig = originalCenters[i];
-          const t = targets[i];
-          const dx = t.x - orig.x;
-          const dy = t.y - orig.y;
-          // small rotation so slices look natural
-          const rot = (t.angle || 0) * (180 / Math.PI) + (i % 2 ? 12 : -10);
-          slice.classList.add("moving");
-          slice.style.transition =
-            "transform 800ms cubic-bezier(.34,1.26,.64,1), opacity 500ms ease, filter 400ms ease";
-          slice.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg) scale(1.05)`;
-          slice.style.opacity = "1";
-        });
-        // start slow rotor and orbit when hovering
-        if (rotor) rotor.classList.add("rotating");
-        startOrbit();
-      }
-
-      function resetSlices() {
-        if (prefersReduced) return;
-        stopOrbit();
-        slices.forEach((slice) => {
-          slice.classList.remove("moving");
-          // smoothly return to original (clear transform so CSS positioning resumes)
-          slice.style.transition =
-            "transform 600ms cubic-bezier(.34,1.56,.64,1), opacity 400ms ease, filter 400ms ease";
-          slice.style.transform = "";
-          slice.style.opacity = "";
-        });
-        if (rotor) rotor.classList.remove("rotating");
-      }
-
-      // assemble animation: slices move into scoop center and shrink briefly
-      function assembleIntoScoop() {
-        if (prefersReduced) return;
-        stopOrbit();
-        const sc = getCenterRect(scoop);
-        slices.forEach((slice, i) => {
-          const srect = slice.getBoundingClientRect();
-          const sx = srect.left + srect.width / 2;
-          const sy = srect.top + srect.height / 2;
-          const dx = sc.x - sx;
-          const dy = sc.y - sy;
-          slice.style.transition =
-            "transform 550ms cubic-bezier(.34,1.56,.64,1), opacity 400ms ease, filter 300ms ease";
-          slice.style.transform = `translate(${dx}px, ${dy}px) scale(.06)`;
-          slice.style.opacity = "0";
-        });
-        section.classList.add("assembled");
-        // spinburst the rotor for a short, punchy effect
-        if (rotor) {
-          rotor.classList.add("spinburst");
-        }
-        // pulse/pop scoop using managed state and image animation
-        setScoopScale(1.08);
-        scoop.classList.add("pop");
-        setTimeout(() => {
-          // revert everything
-          slices.forEach((s) => {
-            s.style.transition = "";
-            s.style.transform = "";
-            s.style.opacity = "";
-          });
-          // reset scoop visuals
-          setScoopScale(1);
-          scoop.classList.remove("pop");
-          section.classList.remove("assembled");
-          if (rotor) {
-            rotor.classList.remove("spinburst");
-            rotor.classList.remove("rotating");
-          }
-        }, 850);
-      }
-
-      // event wiring: hover moves slices, leave resets, click assembles
-      section.addEventListener("pointerenter", (e) => {
-        // position slices once and start orbit; avoid repeatedly repositioning on every pointermove
-        moveSlicesToTargets();
-      });
-      section.addEventListener("pointermove", (e) => {
-        // only update scoop tilt on pointer move to avoid conflicting transforms with the orbit RAF
-        if (!prefersReduced) updateScoopTilt(e);
-      });
-      section.addEventListener("pointerleave", (e) => {
-        resetSlices();
-        if (!prefersReduced) resetScoopTilt();
-      });
-
-      // scoop hover/focus interactions: small scale on enter, reset on leave
-      scoop.addEventListener("pointerenter", () => {
-        if (!prefersReduced) setScoopScale(1.04);
-      });
-      scoop.addEventListener("pointerleave", () => {
-        if (!prefersReduced) setScoopScale(1);
-      });
-
-      // tilt helper: micro-tilt based on pointer relative to scoop center
-      function updateScoopTilt(e) {
-        const sc = getCenterRect(scoop);
-        const dx = (e.clientX - sc.x) / sc.w; // -0.5..0.5 roughly
-        const dy = (e.clientY - sc.y) / sc.h;
-        // small pixel offsets and rotation
-        scoopState.tx = Math.max(-12, Math.min(12, dx * 28));
-        scoopState.ty = Math.max(-10, Math.min(10, dy * 20));
-        scoopState.rot = Math.max(-6, Math.min(6, dx * 12));
-        applyScoopTransform();
-      }
-      function resetScoopTilt() {
-        scoopState.tx = 0;
-        scoopState.ty = 0;
-        scoopState.rot = 0;
-        applyScoopTransform();
-      }
-
-      // orbiting behavior: continuously update slice transforms while hovering
-      function startOrbit() {
-        if (prefersReduced) return;
-        if (orbitRAF) return; // already running
-        const sc = getCenterRect(scoop);
-        orbitStart = performance.now();
-        orbitAngles = slices.map((slice, i) => {
-          const s = slice.getBoundingClientRect();
-          const a = Math.atan2(
-            s.top + s.height / 2 - sc.y,
-            s.left + s.width / 2 - sc.x
-          );
-          return a + i * 0.3;
-        });
-        // base orbit on the original centers so orbiting always returns cleanly
-        orbitOrigCenters = originalCenters.slice();
-        section.classList.add("orbiting");
-        scoop.classList.add("wobble");
-
-        function orbitTick(now) {
-          const elapsed = (now - orbitStart) * 0.001;
-          const speed = 0.7; // radians/sec - slightly slower for smoother feel
-          const rBase = Math.max(40, Math.min(80, (sc.w || 140) * 0.26));
+          root.style.setProperty("--progress", progress.toFixed(4));
+          root.style.setProperty("--light-x", `${22 + progress * 30}%`);
+          root.style.setProperty("--ring-scale", (.9 + progress * .5).toFixed(3));
+          product.style.setProperty("--tx", `${x}vw`);
+          product.style.setProperty("--ty", `${lerp(a.y, b.y, t)}vh`);
+          product.style.setProperty("--tz", `${lerp(a.z, b.z, t)}px`);
+          product.style.setProperty("--xrot", `${lerp(a.rx, b.rx, t)}deg`);
+          product.style.setProperty("--yrot", `${lerp(a.ry, b.ry, t)}deg`);
+          product.style.setProperty("--zrot", `${lerp(a.rz, b.rz, t)}deg`);
+          product.style.setProperty("--scale", lerp(a.s, b.s, t).toFixed(3));
+          const explode = lerp(a.e, b.e, t);
+          const sliceOffsets = [[-70, -35], [80, -45], [-64, 54], [72, 58]];
           slices.forEach((slice, i) => {
-            const baseAngle = orbitAngles[i];
-            const angle = baseAngle + elapsed * (speed + i * 0.04);
-            // make orbit slightly elliptical for a natural look
-            const ox = Math.cos(angle) * rBase;
-            const oy = Math.sin(angle) * (rBase * 0.8);
-            const targetX = sc.x + ox;
-            const targetY = sc.y + oy;
-            const orig = orbitOrigCenters[i];
-            const dx = targetX - orig.x;
-            const dy = targetY - orig.y;
-            const rot = (angle * 180) / Math.PI + (i % 2 ? 12 : -10);
-            slice.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg) scale(1.05)`;
+            slice.style.setProperty("--dx", `${sliceOffsets[i][0] * explode}px`);
+            slice.style.setProperty("--dy", `${sliceOffsets[i][1] * explode}px`);
           });
-          orbitRAF = requestAnimationFrame(orbitTick);
-        }
-        orbitRAF = requestAnimationFrame(orbitTick);
-      }
+          root.style.setProperty("--rx", `${py * -4}deg`);
+          root.style.setProperty("--ry", `${px * 6}deg`);
 
-      function stopOrbit() {
-        if (!orbitRAF) return;
-        cancelAnimationFrame(orbitRAF);
-        orbitRAF = null;
-        orbitAngles = [];
-        orbitOrigCenters = [];
-        section.classList.remove("orbiting");
-        scoop.classList.remove("wobble");
-      }
-      scoop.addEventListener("pointerdown", (e) => {
-        e.stopPropagation();
-        assembleIntoScoop();
-      });
-
-      // keep positions updated on resize
-      window.addEventListener("resize", () => {
-        // recompute original centers in case layout changed
-        originalCenters = slices.map((s) => {
-          const r = s.getBoundingClientRect();
-          return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-        });
-        if (lastTargets) moveSlicesToTargets();
-      });
-
-      // accessibility: keyboard activation when scoop is focused
-      scoop.setAttribute("tabindex", "0");
-      scoop.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          assembleIntoScoop();
+          const active = Math.min(4, Math.round(exact));
+          chapters.forEach((chapter, i) => chapter.classList.toggle("active", i === active));
+          dots.forEach((dot, i) => dot.classList.toggle("active", i === active));
+          counter.textContent = String(active + 1).padStart(2, "0");
         }
-      });
-    })();
-  </script>
-  <script>
-    // page-wide interactive background and outer-circle parallax
-    (function () {
-      const prefersReduced = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      if (prefersReduced) return;
-      const bg = document.querySelector(".background-circle");
-      const rotor = document.querySelector(".rotor");
-      const blobs = Array.from(document.querySelectorAll(".bg-blob"));
-      const bgGradient = document.querySelector(".bg-gradient");
-      // create page light element if missing
-      let pageLight = document.getElementById("page-light");
-      if (!pageLight) {
-        pageLight = document.createElement("div");
-        pageLight.id = "page-light";
-        document.body.appendChild(pageLight);
-      }
-
-      let lastX = 0,
-        lastY = 0;
-      let raf = null;
-
-      function onPointer(e) {
-        lastX = e.clientX;
-        lastY = e.clientY;
-        if (!raf) raf = requestAnimationFrame(update);
-      }
-
-      function update() {
-        raf = null;
-        const w = window.innerWidth,
-          h = window.innerHeight;
-        const nx = (lastX / w - 0.5) * 2; // -1..1
-        const ny = (lastY / h - 0.5) * 2;
-        // small translate and rotate for background circle
-        if (bg) {
-          const tx = nx * 18;
-          const ty = ny * 12;
-          const r = nx * 8;
-          bg.style.transform = `translate(${tx}px, ${ty}px) rotate(${r}deg)`;
-        }
-        // subtle extra rotation overlay for rotor (adds to CSS spin)
-        if (rotor) {
-          const extra = nx * 20;
-          rotor.style.transform = `translate(-50%,-50%) rotate(${extra}deg)`;
-        }
-        // parallax the large background blobs to create depth
-        if (blobs && blobs.length) {
-          blobs.forEach((b, i) => {
-            const depth = (i + 1) * 6; // different parallax per blob
-            const bx = nx * depth * (i % 2 ? 1 : -1);
-            const by = ny * depth * (i % 2 ? -1 : 1);
-            b.style.transform = `translate3d(${bx}px, ${by}px, 0)`;
-          });
-        }
-        if (bgGradient) {
-          const gtx = nx * 8;
-          const gty = ny * 6;
-          bgGradient.style.transform = `translate(${gtx}px, ${gty}px)`;
-        }
-        // page light follow
-        if (pageLight) {
-          const lx = 50 + nx * 22;
-          const ly = 50 + ny * 18;
-          pageLight.style.setProperty("--lx", lx + "%");
-          pageLight.style.setProperty("--ly", ly + "%");
-        }
-      }
-
-      window.addEventListener("pointermove", onPointer, { passive: true });
-      // on touchstart also update quickly
-      window.addEventListener(
-        "touchstart",
-        (e) => {
-          if (e.touches && e.touches[0]) onPointer(e.touches[0]);
-        },
-        { passive: true }
-      );
-
-      // subtle idle motion when no pointer: gentle slow loop
-      let idleTheta = 0;
-      let idleRAF = null;
-      function idleTick() {
-        idleTheta += 0.002;
-        if (bg) {
-          const tx = Math.sin(idleTheta) * 6;
-          const ty = Math.cos(idleTheta) * 4;
-          bg.style.transform = `translate(${tx}px, ${ty}px) rotate(${
-            idleTheta * 6
-          }deg)`;
-        }
-        idleRAF = requestAnimationFrame(idleTick);
-      }
-      idleRAF = requestAnimationFrame(idleTick);
-
-      // pause idle when pointer moves, then resume after timeout
-      let idlePauseTimer = null;
-      function pauseIdle() {
-        if (idleRAF) {
-          cancelAnimationFrame(idleRAF);
-          idleRAF = null;
-        }
-        if (idlePauseTimer) clearTimeout(idlePauseTimer);
-        idlePauseTimer = setTimeout(() => {
-          if (!idleRAF) idleRAF = requestAnimationFrame(idleTick);
-        }, 900);
-      }
-      window.addEventListener("pointermove", pauseIdle, { passive: true });
-
-      // speed up bg/rotor briefly when assembled (hook into existing classes)
-      const observer = new MutationObserver((mut) => {
-        for (const m of mut) {
-          if (m.type === "attributes" && m.attributeName === "class") {
-            const target = m.target;
-            if (target.classList && target.classList.contains("assembled")) {
-              // bump rotor and bg
-              if (rotor) rotor.classList.add("spinburst");
-              if (bg) {
-                bg.style.transition = "transform 260ms ease-out";
-                bg.style.transform += " scale(1.01)";
-              }
-              setTimeout(() => {
-                if (rotor) rotor.classList.remove("spinburst");
-                if (bg) bg.style.transition = "";
-              }, 650);
-            }
-          }
-        }
-      });
-      const sect = document.querySelector(".image-section");
-      if (sect)
-        observer.observe(sect, {
-          attributes: true,
-          attributeFilter: ["class"],
-        });
-    })();
-  </script>
+        function requestRender() { if (!ticking) { ticking = true; requestAnimationFrame(render); } }
+        addEventListener("scroll", requestRender, { passive: true });
+        addEventListener("resize", requestRender);
+        addEventListener("pointermove", event => { pointerX = event.clientX / innerWidth - .5; pointerY = event.clientY / innerHeight - .5; requestRender(); }, { passive: true });
+        dots.forEach(dot => dot.addEventListener("click", () => {
+          const scene = Number(dot.dataset.scene);
+          const max = story.offsetHeight - innerHeight;
+          scrollTo({ top: story.offsetTop + (scene / 4) * max, behavior: reducedMotion ? "auto" : "smooth" });
+        }));
+        render();
+      })();
+    </script>
+  </body>
 </html>
