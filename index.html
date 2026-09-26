@@ -189,6 +189,41 @@
         box-shadow: inset 0 0 0 1px rgba(255,255,255,.2), 0 12px 20px rgba(35,73,50,.2);
       }
       .leaf::after { content: ""; position: absolute; width: 72%; height: 1px; left: 12%; top: 50%; background: rgba(255,255,255,.38); transform: rotate(-24deg); }
+      #peach-canvas { width: 100%; height: 100%; display: block; cursor: grab; touch-action: pan-y; }
+      #peach-canvas:active { cursor: grabbing; }
+      .visual-wrap.webgl { pointer-events: auto; }
+      .webgl-status {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        z-index: 2;
+        padding: 8px 12px;
+        border: 1px solid rgba(255,255,255,.28);
+        border-radius: 99px;
+        background: rgba(76,24,14,.12);
+        color: rgba(255,255,255,.8);
+        font-size: 10px;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        transform: translate(-50%, -50%);
+        transition: opacity .35s ease;
+      }
+      .webgl-ready .webgl-status { opacity: 0; }
+      .interaction-hint {
+        position: absolute;
+        z-index: 16;
+        left: 50%;
+        top: 82px;
+        padding: 7px 11px;
+        border-radius: 99px;
+        background: rgba(255,255,255,.1);
+        color: rgba(255,255,255,.78);
+        font-size: 10px;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        transform: translateX(-50%);
+        backdrop-filter: blur(10px);
+      }
 
       .chapters { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
       .chapter {
@@ -348,16 +383,11 @@
       <section class="story" aria-label="The peach ice cream story">
         <div class="stage">
           <div class="ambient one"></div><div class="ambient two"></div>
-          <div class="visual-wrap" aria-hidden="true">
-            <div class="product-scene">
-              <div class="shadow"></div><div class="halo"></div><div class="leaf"></div>
-              <div class="scoop-shell"><img class="scoop" src="scoop.png" alt="" /></div>
-              <div class="slice a"><img src="peace slice.png" alt="" /></div>
-              <div class="slice b"><img src="peace slice.png" alt="" /></div>
-              <div class="slice c"><img src="peace slice.png" alt="" /></div>
-              <div class="slice d"><img src="peace slice.png" alt="" /></div>
-            </div>
+          <div class="visual-wrap webgl" aria-label="Interactive 3D peach ice cream. Drag to rotate and click to burst the ingredients.">
+            <canvas id="peach-canvas"></canvas>
+            <div class="webgl-status">Churning the scoop…</div>
           </div>
+          <div class="interaction-hint">Move · drag · click</div>
 
           <div class="chapters">
             <article class="chapter active"><p class="kicker">01 · Meet your summer scoop</p><h1>Peach <em>perfected.</em></h1><p>Ripe orchard fruit folded into a slow-churned cream. Bright, velvety and unapologetically peachy.</p></article>
@@ -386,75 +416,6 @@
     </main>
     <footer><span>Peachy © 2026</span><span>Concept & interaction experiment</span></footer>
 
-    <script>
-      (() => {
-        const story = document.querySelector(".story");
-        const root = document.documentElement;
-        const product = document.querySelector(".product-scene");
-        const chapters = [...document.querySelectorAll(".chapter")];
-        const dots = [...document.querySelectorAll(".scene-dot")];
-        const slices = [...document.querySelectorAll(".slice")];
-        const counter = document.querySelector(".counter span");
-        const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-        const mobile = () => innerWidth <= 820;
-        const views = [
-          { x: 12, y: 0, z: 0, rx: 0, ry: -8, rz: -7, s: 1, e: .15 },
-          { x: -18, y: -1, z: 40, rx: -6, ry: 30, rz: 7, s: 1.34, e: .2 },
-          { x: 17, y: 0, z: -20, rx: 10, ry: -38, rz: -12, s: .92, e: 1 },
-          { x: -17, y: -1, z: 30, rx: 58, ry: 4, rz: 145, s: 1.08, e: .62 },
-          { x: 14, y: 1, z: 0, rx: 0, ry: 18, rz: 4, s: 1.04, e: .3 }
-        ];
-        const lerp = (a, b, t) => a + (b - a) * t;
-        const clamp = (n, min = 0, max = 1) => Math.min(max, Math.max(min, n));
-        let pointerX = 0, pointerY = 0, ticking = false;
-
-        function render() {
-          ticking = false;
-          const max = story.offsetHeight - innerHeight;
-          const progress = clamp((scrollY - story.offsetTop) / Math.max(1, max));
-          const exact = progress * (views.length - 1);
-          const index = Math.min(views.length - 1, Math.floor(exact + .0001));
-          const next = Math.min(views.length - 1, index + 1);
-          const t = exact - index;
-          const a = views[index], b = views[next];
-          const px = reducedMotion ? 0 : pointerX, py = reducedMotion ? 0 : pointerY;
-          const x = mobile() ? 0 : lerp(a.x, b.x, t);
-
-          root.style.setProperty("--progress", progress.toFixed(4));
-          root.style.setProperty("--light-x", `${22 + progress * 30}%`);
-          root.style.setProperty("--ring-scale", (.9 + progress * .5).toFixed(3));
-          product.style.setProperty("--tx", `${x}vw`);
-          product.style.setProperty("--ty", `${lerp(a.y, b.y, t)}vh`);
-          product.style.setProperty("--tz", `${lerp(a.z, b.z, t)}px`);
-          product.style.setProperty("--xrot", `${lerp(a.rx, b.rx, t)}deg`);
-          product.style.setProperty("--yrot", `${lerp(a.ry, b.ry, t)}deg`);
-          product.style.setProperty("--zrot", `${lerp(a.rz, b.rz, t)}deg`);
-          product.style.setProperty("--scale", lerp(a.s, b.s, t).toFixed(3));
-          const explode = lerp(a.e, b.e, t);
-          const sliceOffsets = [[-70, -35], [80, -45], [-64, 54], [72, 58]];
-          slices.forEach((slice, i) => {
-            slice.style.setProperty("--dx", `${sliceOffsets[i][0] * explode}px`);
-            slice.style.setProperty("--dy", `${sliceOffsets[i][1] * explode}px`);
-          });
-          root.style.setProperty("--rx", `${py * -4}deg`);
-          root.style.setProperty("--ry", `${px * 6}deg`);
-
-          const active = Math.min(4, Math.round(exact));
-          chapters.forEach((chapter, i) => chapter.classList.toggle("active", i === active));
-          dots.forEach((dot, i) => dot.classList.toggle("active", i === active));
-          counter.textContent = String(active + 1).padStart(2, "0");
-        }
-        function requestRender() { if (!ticking) { ticking = true; requestAnimationFrame(render); } }
-        addEventListener("scroll", requestRender, { passive: true });
-        addEventListener("resize", requestRender);
-        addEventListener("pointermove", event => { pointerX = event.clientX / innerWidth - .5; pointerY = event.clientY / innerHeight - .5; requestRender(); }, { passive: true });
-        dots.forEach(dot => dot.addEventListener("click", () => {
-          const scene = Number(dot.dataset.scene);
-          const max = story.offsetHeight - innerHeight;
-          scrollTo({ top: story.offsetTop + (scene / 4) * max, behavior: reducedMotion ? "auto" : "smooth" });
-        }));
-        render();
-      })();
-    </script>
+    <script type="module" src="experience.js"></script>
   </body>
 </html>
