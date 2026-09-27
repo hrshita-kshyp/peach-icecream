@@ -40,186 +40,76 @@ function makeCanvasTexture(draw, size = 512) {
   return texture;
 }
 
-const scoopTexture = makeCanvasTexture((context, size) => {
-  const gradient = context.createRadialGradient(size * .32, size * .24, 12, size * .5, size * .55, size * .78);
-  gradient.addColorStop(0, "#fff0dc");
-  gradient.addColorStop(.45, "#ffd3bd");
-  gradient.addColorStop(.78, "#f2a398");
-  gradient.addColorStop(1, "#dd7c76");
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, size, size);
-  let seed = 713;
-  const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
-  for (let i = 0; i < 2600; i += 1) {
-    const alpha = .018 + random() * .075;
-    context.fillStyle = random() > .78 ? `rgba(179,82,72,${alpha * .65})` : `rgba(255,248,232,${alpha})`;
-    const radius = .25 + random() * 1.55;
-    context.beginPath();
-    context.arc(random() * size, random() * size, radius, 0, Math.PI * 2);
-    context.fill();
-  }
-  context.strokeStyle = "rgba(255,239,222,.1)";
-  context.lineWidth = 3;
-  for (let line = 0; line < 16; line += 1) {
-    context.beginPath();
-    const x = random() * size;
-    const y = random() * size;
-    context.moveTo(x, y);
-    context.bezierCurveTo(x + 42, y - 18, x + 90, y + 14, x + 128, y - 4);
-    context.stroke();
-  }
-});
+// Smooth, seeded 3D noise keeps the texture continuous around all viewing angles.
+function noise3(x, y, z) {
+  const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z);
+  const smooth = t => t * t * (3 - 2 * t);
+  const u = smooth(x - ix), v = smooth(y - iy), w = smooth(z - iz);
+  const hash = (a, b, c) => {
+    const n = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453;
+    return (n - Math.floor(n)) * 2 - 1;
+  };
+  const layer = dz => lerp(
+    lerp(hash(ix, iy, iz + dz), hash(ix + 1, iy, iz + dz), u),
+    lerp(hash(ix, iy + 1, iz + dz), hash(ix + 1, iy + 1, iz + dz), u), v);
+  return lerp(layer(0), layer(1), w);
+}
 
 const bumpTexture = makeCanvasTexture((context, size) => {
-  const image = context.createImageData(size, size);
-  let seed = 29;
-  for (let i = 0; i < image.data.length; i += 4) {
-    seed = (seed * 9301 + 49297) % 233280;
-    const value = 105 + (seed / 233280) * 95;
-    image.data[i] = image.data[i + 1] = image.data[i + 2] = value;
-    image.data[i + 3] = 255;
+  const pixels = context.createImageData(size, size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const i = (y * size + x) * 4;
+      const grain = noise3(x * .38, y * .38, 4) * 36;
+      const scrape = Math.sin(y * .13 + Math.sin(x * .019) * 7) * 16;
+      const value = 128 + grain + scrape;
+      pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value;
+      pixels.data[i + 3] = 255;
+    }
   }
-  context.putImageData(image, 0, 0);
-}, 256);
-
-const waffleTexture = makeCanvasTexture((context, size) => {
-  const gradient = context.createLinearGradient(0, 0, size, size);
-  gradient.addColorStop(0, "#e8b56e");
-  gradient.addColorStop(.52, "#c78648");
-  gradient.addColorStop(1, "#8f542f");
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, size, size);
-  let seed = 911;
-  const random = () => ((seed = (seed * 48271) % 2147483647) - 1) / 2147483646;
-  for (let i = 0; i < 900; i += 1) {
-    context.fillStyle = `rgba(${120 + random() * 70},${60 + random() * 45},${28 + random() * 20},${.025 + random() * .06})`;
-    context.fillRect(random() * size, random() * size, 1 + random() * 3, 1 + random() * 3);
-  }
-  context.strokeStyle = "rgba(82,42,24,.32)";
-  context.lineWidth = 8;
-  for (let offset = -size; offset < size * 2; offset += 62) {
-    context.beginPath(); context.moveTo(offset, 0); context.lineTo(offset + size, size); context.stroke();
-    context.beginPath(); context.moveTo(offset, size); context.lineTo(offset + size, 0); context.stroke();
-  }
-  context.strokeStyle = "rgba(255,224,158,.2)";
-  context.lineWidth = 3;
-  for (let offset = -size; offset < size * 2; offset += 62) {
-    context.beginPath(); context.moveTo(offset + 8, 0); context.lineTo(offset + size + 8, size); context.stroke();
-  }
-});
-waffleTexture.repeat.set(2.8, 4.5);
+  context.putImageData(pixels, 0, 0);
+}, 512);
+bumpTexture.colorSpace = THREE.NoColorSpace;
+bumpTexture.repeat.set(3, 2);
 
 function createScoop() {
-  const geometry = new THREE.SphereGeometry(1.56, 96, 64);
+  const geometry = new THREE.SphereGeometry(1, 192, 128);
   const positions = geometry.attributes.position;
+  const colors = [];
+  const cream = new THREE.Color('#ffe2c5');
+  const peach = new THREE.Color('#eeac83');
+  const fruit = new THREE.Color('#ce7850');
+  const color = new THREE.Color();
   const vertex = new THREE.Vector3();
-  for (let index = 0; index < positions.count; index += 1) {
-    vertex.fromBufferAttribute(positions, index);
-    const wave = Math.sin(vertex.x * 5.2 + vertex.y * 2.4) * .012
-      + Math.sin(vertex.y * 8.8 - vertex.z * 3.4) * .008
-      + Math.cos(vertex.z * 9.2 + vertex.x * 2.2) * .006;
-    vertex.normalize().multiplyScalar(1.56 * (1 + wave));
-    positions.setXYZ(index, vertex.x, vertex.y, vertex.z);
+  for (let i = 0; i < positions.count; i++) {
+    vertex.fromBufferAttribute(positions, i).normalize();
+    const { x, y, z } = vertex;
+    const broad = noise3(x * 3.8, y * 3.8, z * 3.8);
+    const medium = noise3(x * 13, y * 13, z * 13);
+    const fine = noise3(x * 48, y * 48, z * 48);
+    // Curved shallow scrape marks left by a scoop, with a ragged lower edge.
+    const sweep = y * 29 + x * 7 + z * 5 + broad * 3;
+    const scrape = Math.pow(.5 + .5 * Math.sin(sweep), 10) * .024;
+    const lower = Math.exp(-Math.pow((y + .55) / .23, 2));
+    const scallop = (.5 + .5 * Math.sin(Math.atan2(z, x) * 19 + broad)) * lower * .055;
+    const radius = 1.58 * (1 + broad * .045 + medium * .016 + fine * .006 - scrape + scallop);
+    positions.setXYZ(i, x * radius, y * radius * .91, z * radius);
+    const ribbon = noise3(x * 4 + 12, y * 4, z * 4);
+    color.copy(cream).lerp(peach, clamp((ribbon + .3) * .55));
+    const fleck = noise3(x * 33 + 7, y * 33, z * 33);
+    if (fleck > .48) color.lerp(fruit, clamp((fleck - .48) * 2));
+    colors.push(color.r, color.g, color.b);
   }
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   geometry.computeVertexNormals();
   const material = new THREE.MeshPhysicalMaterial({
-    map: scoopTexture,
-    bumpMap: bumpTexture,
-    bumpScale: .02,
-    roughness: .6,
-    metalness: 0,
-    clearcoat: .18,
-    clearcoatRoughness: .72
+    vertexColors: true, bumpMap: bumpTexture, bumpScale: .045,
+    roughness: .83, metalness: 0, clearcoat: .045, clearcoatRoughness: .8
   });
   const scoop = new THREE.Mesh(geometry, material);
-  scoop.position.y = .08;
-  scoop.scale.set(1.05, .46, 1.02);
-  scoop.castShadow = true;
-  scoop.receiveShadow = true;
+  scoop.castShadow = scoop.receiveShadow = true;
   product.add(scoop);
-
   return scoop;
-}
-
-function createCone() {
-  const material = new THREE.MeshPhysicalMaterial({ map: waffleTexture, roughness: .78, side: THREE.DoubleSide });
-  const cone = new THREE.Mesh(new THREE.ConeGeometry(1.24, 3.15, 64, 1, true), material);
-  cone.position.y = -2.13;
-  cone.rotation.y = .12;
-  cone.castShadow = true;
-  cone.receiveShadow = true;
-  product.add(cone);
-
-}
-
-function createSoftServeSwirl() {
-  const profile = [
-    new THREE.Vector2(.1, 0),
-    new THREE.Vector2(.56, .13),
-    new THREE.Vector2(1.03, .37),
-    new THREE.Vector2(1.22, .66),
-    new THREE.Vector2(.98, .93),
-    new THREE.Vector2(.74, 1.16),
-    new THREE.Vector2(.9, 1.39),
-    new THREE.Vector2(.63, 1.68),
-    new THREE.Vector2(.45, 1.95),
-    new THREE.Vector2(.56, 2.17),
-    new THREE.Vector2(.25, 2.43),
-    new THREE.Vector2(.08, 2.58)
-  ];
-  const geometry = new THREE.LatheGeometry(profile, 128);
-  const positions = geometry.attributes.position;
-  const vertex = new THREE.Vector3();
-  for (let index = 0; index < positions.count; index += 1) {
-    vertex.fromBufferAttribute(positions, index);
-    const theta = Math.atan2(vertex.z, vertex.x);
-    const ridge = Math.sin(theta * 5.5 + vertex.y * 6.4) * (.055 - vertex.y * .012);
-    const radius = Math.hypot(vertex.x, vertex.z) + ridge;
-    positions.setXYZ(index, Math.cos(theta) * radius, vertex.y, Math.sin(theta) * radius);
-  }
-  geometry.computeVertexNormals();
-  const material = new THREE.MeshPhysicalMaterial({
-    color: 0xffead8,
-    roughness: .48,
-    clearcoat: .18,
-    clearcoatRoughness: .6,
-    bumpMap: bumpTexture,
-    bumpScale: .018
-  });
-  const swirl = new THREE.Mesh(geometry, material);
-  swirl.position.set(.02, .72, -.05);
-  swirl.scale.set(1.12, .92, 1.12);
-  swirl.castShadow = true;
-  swirl.receiveShadow = true;
-  product.add(swirl);
-  return swirl;
-}
-
-function createMeltingEdge() {
-  const meltMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0xee928b,
-    roughness: .44,
-    clearcoat: .22,
-    clearcoatRoughness: .38
-  });
-  const drips = [
-    [-.62, .36, .34, .054],
-    [-.16, .61, .46, .046],
-    [.42, .48, .38, .05]
-  ];
-  drips.forEach(([x, z, length, radius], index) => {
-    const group = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(radius * .52, radius, length, 18), meltMaterial);
-    body.position.y = -length / 2;
-    const drop = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.18, 18, 14), meltMaterial);
-    drop.position.y = -length - radius * .16;
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(radius, 16, 10), meltMaterial);
-    group.add(body, drop, cap);
-    group.position.set(x, -.58 + Math.sin(index) * .04, z);
-    group.rotation.z = (index - 1.5) * .025;
-    group.castShadow = true;
-    product.add(group);
-  });
 }
 
 function createPeachSlice(index) {
@@ -248,9 +138,9 @@ function createPeachSlice(index) {
 }
 
 const scoop = createScoop();
-createCone();
-createMeltingEdge();
-const swirl = createSoftServeSwirl();
+
+
+
 const peachSlices = Array.from({ length: 2 }, (_, index) => createPeachSlice(index));
 
 const particleGeometry = new THREE.SphereGeometry(.045, 8, 8);
@@ -265,14 +155,19 @@ for (let index = 0; index < 30; index += 1) {
   particles.push(particle);
 }
 
-const softLight = new THREE.HemisphereLight(0xffe8ca, 0x6f3a35, 1.25);
+const softLight = new THREE.HemisphereLight(0xfff6e9, 0xc3a99b, 2.4);
 scene.add(softLight);
 const keyLight = new THREE.DirectionalLight(0xfff1d7, 2.9);
 keyLight.position.set(-4, 6, 5);
 keyLight.castShadow = true;
-keyLight.shadow.mapSize.set(1024, 1024);
+keyLight.shadow.mapSize.set(2048, 2048);
+keyLight.shadow.normalBias = .035;
+keyLight.shadow.radius = 4;
+const fillLight = new THREE.DirectionalLight(0xe7efff, 1.3);
+fillLight.position.set(4, 1, 4);
+scene.add(fillLight);
 scene.add(keyLight);
-const cursorLight = new THREE.PointLight(0xffd6a2, 24, 13, 1.7);
+const cursorLight = new THREE.PointLight(0xffeadb, 4, 16, 2);
 cursorLight.position.set(3, 2, 5);
 scene.add(cursorLight);
 const rimLight = new THREE.PointLight(0xff7c6b, 18, 12, 2);
@@ -281,18 +176,18 @@ scene.add(rimLight);
 
 const floor = new THREE.Mesh(
   new THREE.CircleGeometry(3.2, 64),
-  new THREE.ShadowMaterial({ color: 0x5f1e18, opacity: .23 })
+  new THREE.ShadowMaterial({ color: 0x5f1e18, opacity: .08 })
 );
 floor.rotation.x = -Math.PI / 2;
-floor.position.y = -3.72;
+floor.position.y = -1.85;
 floor.receiveShadow = true;
 product.add(floor);
 
 const views = [
-  { x: 2.05, y: -.02, rx: .03, ry: -.18, rz: -.04, scale: .96, explode: -.95 },
-  { x: -2.18, y: .05, rx: -.08, ry: .46, rz: .04, scale: 1.2, explode: -.48 },
+  { x: 2.05, y: 0, rx: .03, ry: -.18, rz: -.04, scale: 1.13, explode: -.95 },
+  { x: -2.18, y: .05, rx: -.08, ry: .46, rz: .04, scale: 1.03, explode: -.48 },
   { x: 2.1, y: .15, rx: .1, ry: -.62, rz: -.12, scale: .92, explode: 1 },
-  { x: -2.1, y: -.05, rx: 1.02, ry: .05, rz: 2.3, scale: .96, explode: .65 },
+  { x: -2.1, y: -.05, rx: .2, ry: 1.8, rz: .18, scale: .96, explode: .65 },
   { x: 2.1, y: .05, rx: 0, ry: .25, rz: .04, scale: 1.03, explode: .22 }
 ];
 
@@ -345,7 +240,7 @@ function setPointer(event) {
   state.pointer.y = -((event.clientY / innerHeight) * 2 - 1);
   if (state.dragging) {
     state.dragX += (event.clientX - state.lastX) * .008;
-    state.dragY += (event.clientY - state.lastY) * .006;
+    state.dragY = clamp(state.dragY + (event.clientY - state.lastY) * .003, -.35, .35);
     state.lastX = event.clientX;
     state.lastY = event.clientY;
   }
@@ -391,8 +286,7 @@ function animate() {
   world.rotation.y = lerp(world.rotation.y, view.ry + state.dragX + state.smoothPointer.x * .3, .065);
   world.rotation.z = lerp(world.rotation.z, view.rz - state.smoothPointer.x * .04, .065);
   product.position.y = Math.sin(time * 1.15) * (reducedMotion ? 0 : .055);
-  scoop.rotation.y += reducedMotion ? 0 : delta * .045;
-  swirl.rotation.y -= reducedMotion ? 0 : delta * .035;
+  product.rotation.y = reducedMotion ? 0 : Math.sin(time * .22) * .06;
 
   const explosion = view.explode + state.burst * 1.65;
   peachSlices.forEach((slice, index) => {
@@ -406,7 +300,7 @@ function animate() {
     slice.position.y = lerp(slice.position.y, targetY, .065);
     slice.position.z = lerp(slice.position.z, targetZ, .065);
     const base = slice.userData.baseScale || .26;
-    const garnishScale = base * (.42 + heroTuck * .92 + state.burst * .42);
+    const garnishScale = base * (heroTuck * .92 + state.burst * .42);
     const nextScale = slice.userData.leaf
       ? new THREE.Vector3(garnishScale, garnishScale * .065, garnishScale * .38)
       : new THREE.Vector3(garnishScale, garnishScale, garnishScale);
