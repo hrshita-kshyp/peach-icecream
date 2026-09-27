@@ -107,9 +107,67 @@ function createScoop() {
     roughness: .83, metalness: 0, clearcoat: .045, clearcoatRoughness: .8
   });
   const scoop = new THREE.Mesh(geometry, material);
+  scoop.position.y = .38;
+  scoop.scale.setScalar(.9);
   scoop.castShadow = scoop.receiveShadow = true;
   product.add(scoop);
   return scoop;
+}
+
+function createServingCup() {
+  const label = makeCanvasTexture((ctx, size) => {
+    ctx.fillStyle = '#f4e9d5';
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#295747';
+    ctx.fillRect(0, size * .88, size, size * .12);
+    ctx.fillStyle = '#dd9c78';
+    ctx.fillRect(0, size * .085, size, size * .012);
+    // Repeat the label so the cup stays identifiable as it rotates.
+    for (const x of [size * .25, size * .75]) {
+      ctx.save();
+      ctx.translate(x, 0);
+      ctx.scale(.3, 1);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#295747';
+      ctx.font = `italic ${size * .14}px Georgia`;
+      ctx.fillText('Peachy', 0, size * .46);
+      ctx.font = `${size * .03}px sans-serif`;
+      ctx.fillText('SMALL BATCH ICE CREAM', 0, size * .55);
+      ctx.fillStyle = '#a56345';
+      ctx.font = `${size * .04}px sans-serif`;
+      ctx.fillText('PEACH & CREAM', 0, size * .71);
+      ctx.restore();
+    }
+  }, 1024);
+  label.wrapT = THREE.ClampToEdgeWrapping;
+  const cup = new THREE.Group();
+  const paper = new THREE.MeshStandardMaterial({ map: label, roughness: .86 });
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(1.29, .99, 1.48, 128, 1, true), paper);
+  body.position.y = -1.05;
+  body.rotation.y = Math.PI / 2 + .18;
+  body.castShadow = body.receiveShadow = true;
+  cup.add(body);
+  const ivory = new THREE.MeshStandardMaterial({ color: '#f4e9d5', roughness: .75 });
+  const inside = new THREE.Mesh(new THREE.CylinderGeometry(1.255, .965, 1.46, 128, 1, true), ivory);
+  inside.material = ivory.clone();
+  inside.material.side = THREE.BackSide;
+  inside.position.y = -1.05;
+  cup.add(inside);
+  // A narrow rolled paper lip belongs to the cup, flush with its opening.
+  const lip = new THREE.Mesh(new THREE.TorusGeometry(1.275, .035, 16, 128), ivory);
+  lip.rotation.x = Math.PI / 2;
+  lip.position.y = -.31;
+  lip.castShadow = true;
+  cup.add(lip);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(.99, .99, .045, 96), ivory);
+  base.position.y = -1.79;
+  cup.add(base);
+  const cream = new THREE.Mesh(new THREE.CircleGeometry(1.245, 96), new THREE.MeshStandardMaterial({ color: '#f6d3b5', roughness: .9 }));
+  cream.rotation.x = -Math.PI / 2;
+  cream.position.y = -.34;
+  cream.receiveShadow = true;
+  cup.add(cream);
+  product.add(cup);
 }
 
 function createPeachSlice(index) {
@@ -138,6 +196,7 @@ function createPeachSlice(index) {
 }
 
 const scoop = createScoop();
+createServingCup();
 
 
 
@@ -184,7 +243,7 @@ floor.receiveShadow = true;
 product.add(floor);
 
 const views = [
-  { x: 2.05, y: 0, rx: .03, ry: -.18, rz: -.04, scale: 1.13, explode: -.95 },
+  { x: 2.05, y: .08, rx: .08, ry: -.18, rz: -.04, scale: 1.06, explode: -.95 },
   { x: -2.18, y: .05, rx: -.08, ry: .46, rz: .04, scale: 1.03, explode: -.48 },
   { x: 2.1, y: .15, rx: .1, ry: -.62, rz: -.12, scale: .92, explode: 1 },
   { x: -2.1, y: -.05, rx: .2, ry: 1.8, rz: .18, scale: .96, explode: .65 },
