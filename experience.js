@@ -133,6 +133,7 @@ function createScoop() {
   });
   const scoop = new THREE.Mesh(geometry, material);
   scoop.position.y = .62;
+  scoop.scale.set(1.08, 1.06, 1.08);
   scoop.castShadow = true;
   scoop.receiveShadow = true;
   product.add(scoop);
@@ -149,14 +150,6 @@ function createCone() {
   cone.receiveShadow = true;
   product.add(cone);
 
-  const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(1.22, .075, 12, 64),
-    new THREE.MeshPhysicalMaterial({ color: 0xc77d3d, roughness: .7 })
-  );
-  rim.position.y = -.555;
-  rim.rotation.x = Math.PI / 2;
-  rim.castShadow = true;
-  product.add(rim);
 }
 
 function createSoftServeSwirl() {
@@ -194,8 +187,8 @@ function createSoftServeSwirl() {
     bumpScale: .018
   });
   const swirl = new THREE.Mesh(geometry, material);
-  swirl.position.set(.02, 1.68, -.05);
-  swirl.scale.set(.72, .64, .72);
+  swirl.position.set(.02, 1.66, -.05);
+  swirl.scale.set(.82, .72, .82);
   swirl.castShadow = true;
   swirl.receiveShadow = true;
   product.add(swirl);
@@ -209,18 +202,10 @@ function createMeltingEdge() {
     clearcoat: .22,
     clearcoatRoughness: .38
   });
-  const collar = new THREE.Mesh(new THREE.TorusGeometry(1.11, .065, 16, 96), meltMaterial);
-  collar.position.y = -.55;
-  collar.rotation.x = Math.PI / 2;
-  collar.scale.set(1.04, .74, 1);
-  collar.castShadow = true;
-  product.add(collar);
-
   const drips = [
-    [-.82, .28, .42, .072],
-    [-.36, .58, .56, .055],
-    [.18, .62, .7, .068],
-    [.62, .38, .46, .055]
+    [-.62, .36, .34, .054],
+    [-.16, .61, .46, .046],
+    [.42, .48, .38, .05]
   ];
   drips.forEach(([x, z, length, radius], index) => {
     const group = new THREE.Group();
@@ -256,7 +241,8 @@ function createPeachSlice(index) {
   groove.position.set(-.1, .23, .28);
   groove.rotation.z = -.25;
   group.add(groove);
-  group.scale.setScalar(.46 + (index % 2) * .06);
+  group.userData.baseScale = .26 + (index % 2) * .04;
+  group.scale.setScalar(group.userData.baseScale);
   ingredients.add(group);
   return group;
 }
@@ -265,12 +251,14 @@ const scoop = createScoop();
 createCone();
 createMeltingEdge();
 const swirl = createSoftServeSwirl();
-const peachSlices = Array.from({ length: 5 }, (_, index) => createPeachSlice(index));
+const peachSlices = Array.from({ length: 3 }, (_, index) => createPeachSlice(index));
 
 const leafMaterial = new THREE.MeshPhysicalMaterial({ color: 0x5b6b46, roughness: .88, side: THREE.DoubleSide });
-for (let index = 0; index < 2; index += 1) {
+for (let index = 0; index < 1; index += 1) {
   const leaf = new THREE.Mesh(new THREE.SphereGeometry(.48, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), leafMaterial);
-  leaf.scale.set(.9, .055, .34);
+  leaf.userData.baseScale = .32;
+  leaf.userData.leaf = true;
+  leaf.scale.set(.32, .02, .12);
   leaf.position.set(index - 1, 1.4 + index * .2, -.5);
   leaf.rotation.set(.4, index * 1.5, .5);
   leaf.castShadow = true;
@@ -314,8 +302,8 @@ floor.receiveShadow = true;
 product.add(floor);
 
 const views = [
-  { x: 2.05, y: -.02, rx: .03, ry: -.18, rz: -.04, scale: .88, explode: -.55 },
-  { x: -2.18, y: .05, rx: -.08, ry: .46, rz: .04, scale: 1.18, explode: -.25 },
+  { x: 2.05, y: -.02, rx: .03, ry: -.18, rz: -.04, scale: .96, explode: -.95 },
+  { x: -2.18, y: .05, rx: -.08, ry: .46, rz: .04, scale: 1.2, explode: -.48 },
   { x: 2.1, y: .15, rx: .1, ry: -.62, rz: -.12, scale: .92, explode: 1 },
   { x: -2.1, y: -.05, rx: 1.02, ry: .05, rz: 2.3, scale: .96, explode: .65 },
   { x: 2.1, y: .05, rx: 0, ry: .25, rz: .04, scale: 1.03, explode: .22 }
@@ -422,13 +410,20 @@ function animate() {
   const explosion = view.explode + state.burst * 1.65;
   peachSlices.forEach((slice, index) => {
     const angle = time * (.16 + index * .003) + index * (Math.PI * 2 / peachSlices.length) + state.smoothPointer.x * .8;
-    const radius = 2.15 + explosion * 1.1 + (index % 3) * .1;
-    const targetX = Math.cos(angle) * radius + state.smoothPointer.x * (index % 2 ? .7 : -.4);
-    const targetY = .15 + Math.sin(angle * 1.35 + index) * (1.18 + explosion * .32) + state.smoothPointer.y * .5;
-    const targetZ = Math.sin(angle) * (1.35 + explosion * .45);
+    const heroTuck = clamp((explosion + .95) / .95);
+    const radius = 1.25 + heroTuck * 1.9 + (index % 3) * .08;
+    const targetX = Math.cos(angle) * radius + state.smoothPointer.x * (index % 2 ? .42 : -.24);
+    const targetY = .22 + Math.sin(angle * 1.35 + index) * (.62 + heroTuck * .92) + state.smoothPointer.y * .35;
+    const targetZ = Math.sin(angle) * (.82 + heroTuck * 1.05);
     slice.position.x = lerp(slice.position.x, targetX, .065);
     slice.position.y = lerp(slice.position.y, targetY, .065);
     slice.position.z = lerp(slice.position.z, targetZ, .065);
+    const base = slice.userData.baseScale || .26;
+    const garnishScale = base * (.42 + heroTuck * .92 + state.burst * .42);
+    const nextScale = slice.userData.leaf
+      ? new THREE.Vector3(garnishScale, garnishScale * .065, garnishScale * .38)
+      : new THREE.Vector3(garnishScale, garnishScale, garnishScale);
+    slice.scale.lerp(nextScale, .08);
     slice.rotation.x += reducedMotion ? 0 : .006 + index * .0004;
     slice.rotation.y += reducedMotion ? 0 : .009;
     slice.rotation.z = angle + .35;
