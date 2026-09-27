@@ -204,35 +204,34 @@ function createSoftServeSwirl() {
 
 function createMeltingEdge() {
   const meltMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0xf4a2a1,
-    roughness: .38,
-    clearcoat: .38,
-    clearcoatRoughness: .28
+    color: 0xee928b,
+    roughness: .44,
+    clearcoat: .22,
+    clearcoatRoughness: .38
   });
-  const collar = new THREE.Mesh(new THREE.TorusGeometry(1.17, .12, 18, 96), meltMaterial);
+  const collar = new THREE.Mesh(new THREE.TorusGeometry(1.11, .065, 16, 96), meltMaterial);
   collar.position.y = -.55;
   collar.rotation.x = Math.PI / 2;
-  collar.scale.set(1.05, .78, 1);
+  collar.scale.set(1.04, .74, 1);
   collar.castShadow = true;
   product.add(collar);
 
   const drips = [
-    [-.95, .16, .9, .12],
-    [-.52, .44, .62, .08],
-    [.08, .52, 1.08, .11],
-    [.58, .38, .74, .095],
-    [1.03, .1, .5, .075]
+    [-.82, .28, .42, .072],
+    [-.36, .58, .56, .055],
+    [.18, .62, .7, .068],
+    [.62, .38, .46, .055]
   ];
   drips.forEach(([x, z, length, radius], index) => {
     const group = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(radius * .72, radius, length, 18), meltMaterial);
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(radius * .52, radius, length, 18), meltMaterial);
     body.position.y = -length / 2;
-    const drop = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.28, 18, 14), meltMaterial);
-    drop.position.y = -length;
+    const drop = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.18, 18, 14), meltMaterial);
+    drop.position.y = -length - radius * .16;
     const cap = new THREE.Mesh(new THREE.SphereGeometry(radius, 16, 10), meltMaterial);
     group.add(body, drop, cap);
     group.position.set(x, -.58 + Math.sin(index) * .04, z);
-    group.rotation.z = (index - 2) * .04;
+    group.rotation.z = (index - 1.5) * .025;
     group.castShadow = true;
     product.add(group);
   });
@@ -257,7 +256,7 @@ function createPeachSlice(index) {
   groove.position.set(-.1, .23, .28);
   groove.rotation.z = -.25;
   group.add(groove);
-  group.scale.setScalar(.72 + (index % 2) * .1);
+  group.scale.setScalar(.46 + (index % 2) * .06);
   ingredients.add(group);
   return group;
 }
@@ -266,12 +265,12 @@ const scoop = createScoop();
 createCone();
 createMeltingEdge();
 const swirl = createSoftServeSwirl();
-const peachSlices = Array.from({ length: 7 }, (_, index) => createPeachSlice(index));
+const peachSlices = Array.from({ length: 5 }, (_, index) => createPeachSlice(index));
 
-const leafMaterial = new THREE.MeshPhysicalMaterial({ color: 0x365a3d, roughness: .84, side: THREE.DoubleSide });
-for (let index = 0; index < 3; index += 1) {
+const leafMaterial = new THREE.MeshPhysicalMaterial({ color: 0x5b6b46, roughness: .88, side: THREE.DoubleSide });
+for (let index = 0; index < 2; index += 1) {
   const leaf = new THREE.Mesh(new THREE.SphereGeometry(.48, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), leafMaterial);
-  leaf.scale.set(1.8, .12, .68);
+  leaf.scale.set(.9, .055, .34);
   leaf.position.set(index - 1, 1.4 + index * .2, -.5);
   leaf.rotation.set(.4, index * 1.5, .5);
   leaf.castShadow = true;
@@ -315,8 +314,8 @@ floor.receiveShadow = true;
 product.add(floor);
 
 const views = [
-  { x: 2.25, y: .1, rx: -.02, ry: -.2, rz: -.08, scale: 1, explode: .12 },
-  { x: -2.25, y: .05, rx: -.12, ry: .62, rz: .06, scale: 1.34, explode: .2 },
+  { x: 2.05, y: -.02, rx: .03, ry: -.18, rz: -.04, scale: .88, explode: -.55 },
+  { x: -2.18, y: .05, rx: -.08, ry: .46, rz: .04, scale: 1.18, explode: -.25 },
   { x: 2.1, y: .15, rx: .1, ry: -.62, rz: -.12, scale: .92, explode: 1 },
   { x: -2.1, y: -.05, rx: 1.02, ry: .05, rz: 2.3, scale: .96, explode: .65 },
   { x: 2.1, y: .05, rx: 0, ry: .25, rz: .04, scale: 1.03, explode: .22 }
@@ -423,10 +422,10 @@ function animate() {
   const explosion = view.explode + state.burst * 1.65;
   peachSlices.forEach((slice, index) => {
     const angle = time * (.16 + index * .003) + index * (Math.PI * 2 / peachSlices.length) + state.smoothPointer.x * .8;
-    const radius = 2.42 + explosion * 1.25 + (index % 3) * .13;
+    const radius = 2.15 + explosion * 1.1 + (index % 3) * .1;
     const targetX = Math.cos(angle) * radius + state.smoothPointer.x * (index % 2 ? .7 : -.4);
-    const targetY = .25 + Math.sin(angle * 1.35 + index) * (1.45 + explosion * .36) + state.smoothPointer.y * .5;
-    const targetZ = Math.sin(angle) * (1.65 + explosion * .5);
+    const targetY = .15 + Math.sin(angle * 1.35 + index) * (1.18 + explosion * .32) + state.smoothPointer.y * .5;
+    const targetZ = Math.sin(angle) * (1.35 + explosion * .45);
     slice.position.x = lerp(slice.position.x, targetX, .065);
     slice.position.y = lerp(slice.position.y, targetY, .065);
     slice.position.z = lerp(slice.position.z, targetZ, .065);
