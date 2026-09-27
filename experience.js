@@ -41,29 +41,31 @@ function makeCanvasTexture(draw, size = 512) {
 }
 
 const scoopTexture = makeCanvasTexture((context, size) => {
-  const gradient = context.createRadialGradient(size * .34, size * .26, 10, size * .5, size * .5, size * .72);
-  gradient.addColorStop(0, "#ffd2bc");
-  gradient.addColorStop(.48, "#ef9878");
-  gradient.addColorStop(1, "#c95749");
+  const gradient = context.createRadialGradient(size * .31, size * .22, 12, size * .52, size * .56, size * .78);
+  gradient.addColorStop(0, "#ffe6ce");
+  gradient.addColorStop(.42, "#f7a58c");
+  gradient.addColorStop(.78, "#df6f67");
+  gradient.addColorStop(1, "#b94b41");
   context.fillStyle = gradient;
   context.fillRect(0, 0, size, size);
   let seed = 713;
   const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
-  for (let i = 0; i < 2100; i += 1) {
-    const alpha = .025 + random() * .1;
-    context.fillStyle = random() > .72 ? `rgba(173,65,45,${alpha})` : `rgba(255,245,220,${alpha})`;
-    const radius = .4 + random() * 2.1;
+  for (let i = 0; i < 2600; i += 1) {
+    const alpha = .018 + random() * .075;
+    context.fillStyle = random() > .78 ? `rgba(120,42,34,${alpha})` : `rgba(255,245,226,${alpha})`;
+    const radius = .25 + random() * 1.55;
     context.beginPath();
     context.arc(random() * size, random() * size, radius, 0, Math.PI * 2);
     context.fill();
   }
-  context.strokeStyle = "rgba(173,65,45,.18)";
-  context.lineWidth = 5;
-  for (let line = 0; line < 11; line += 1) {
+  context.strokeStyle = "rgba(255,226,204,.12)";
+  context.lineWidth = 3;
+  for (let line = 0; line < 16; line += 1) {
     context.beginPath();
-    const y = 50 + line * 40;
-    context.moveTo(-20, y);
-    context.bezierCurveTo(120, y - 30, 320, y + 28, size + 20, y - 8);
+    const x = random() * size;
+    const y = random() * size;
+    context.moveTo(x, y);
+    context.bezierCurveTo(x + 42, y - 18, x + 90, y + 14, x + 128, y - 4);
     context.stroke();
   }
 });
@@ -82,20 +84,26 @@ const bumpTexture = makeCanvasTexture((context, size) => {
 
 const waffleTexture = makeCanvasTexture((context, size) => {
   const gradient = context.createLinearGradient(0, 0, size, size);
-  gradient.addColorStop(0, "#efb34f");
-  gradient.addColorStop(.55, "#c8792f");
-  gradient.addColorStop(1, "#8e4827");
+  gradient.addColorStop(0, "#e8b56e");
+  gradient.addColorStop(.52, "#c78648");
+  gradient.addColorStop(1, "#8f542f");
   context.fillStyle = gradient;
   context.fillRect(0, 0, size, size);
-  context.strokeStyle = "rgba(103,48,24,.5)";
-  context.lineWidth = 12;
-  for (let offset = -size; offset < size * 2; offset += 54) {
+  let seed = 911;
+  const random = () => ((seed = (seed * 48271) % 2147483647) - 1) / 2147483646;
+  for (let i = 0; i < 900; i += 1) {
+    context.fillStyle = `rgba(${120 + random() * 70},${60 + random() * 45},${28 + random() * 20},${.025 + random() * .06})`;
+    context.fillRect(random() * size, random() * size, 1 + random() * 3, 1 + random() * 3);
+  }
+  context.strokeStyle = "rgba(82,42,24,.32)";
+  context.lineWidth = 8;
+  for (let offset = -size; offset < size * 2; offset += 62) {
     context.beginPath(); context.moveTo(offset, 0); context.lineTo(offset + size, size); context.stroke();
     context.beginPath(); context.moveTo(offset, size); context.lineTo(offset + size, 0); context.stroke();
   }
-  context.strokeStyle = "rgba(255,224,139,.28)";
-  context.lineWidth = 4;
-  for (let offset = -size; offset < size * 2; offset += 54) {
+  context.strokeStyle = "rgba(255,224,158,.2)";
+  context.lineWidth = 3;
+  for (let offset = -size; offset < size * 2; offset += 62) {
     context.beginPath(); context.moveTo(offset + 8, 0); context.lineTo(offset + size + 8, size); context.stroke();
   }
 });
@@ -117,11 +125,11 @@ function createScoop() {
   const material = new THREE.MeshPhysicalMaterial({
     map: scoopTexture,
     bumpMap: bumpTexture,
-    bumpScale: .055,
-    roughness: .82,
+    bumpScale: .035,
+    roughness: .68,
     metalness: 0,
-    clearcoat: .08,
-    clearcoatRoughness: .8
+    clearcoat: .18,
+    clearcoatRoughness: .72
   });
   const scoop = new THREE.Mesh(geometry, material);
   scoop.position.y = .62;
@@ -129,21 +137,11 @@ function createScoop() {
   scoop.receiveShadow = true;
   product.add(scoop);
 
-  const ruffleMaterial = material.clone();
-  ruffleMaterial.color.set(0xf2a080);
-  for (let index = 0; index < 18; index += 1) {
-    const angle = (index / 18) * Math.PI * 2;
-    const ruffle = new THREE.Mesh(new THREE.SphereGeometry(.22 + (index % 3) * .018, 18, 14), ruffleMaterial);
-    ruffle.position.set(Math.cos(angle) * 1.14, -.82 + Math.sin(index * 2.1) * .075, Math.sin(angle) * 1.14);
-    ruffle.scale.set(.98, .48, .82);
-    ruffle.castShadow = true;
-    product.add(ruffle);
-  }
   return scoop;
 }
 
 function createCone() {
-  const material = new THREE.MeshPhysicalMaterial({ map: waffleTexture, roughness: .72, side: THREE.DoubleSide });
+  const material = new THREE.MeshPhysicalMaterial({ map: waffleTexture, roughness: .78, side: THREE.DoubleSide });
   const cone = new THREE.Mesh(new THREE.ConeGeometry(1.24, 3.15, 64, 1, true), material);
   cone.position.y = -2.13;
   cone.rotation.y = .12;
@@ -153,7 +151,7 @@ function createCone() {
 
   const rim = new THREE.Mesh(
     new THREE.TorusGeometry(1.22, .075, 12, 64),
-    new THREE.MeshPhysicalMaterial({ color: 0xd98c3d, roughness: .68 })
+    new THREE.MeshPhysicalMaterial({ color: 0xc77d3d, roughness: .7 })
   );
   rim.position.y = -.555;
   rim.rotation.x = Math.PI / 2;
@@ -161,21 +159,100 @@ function createCone() {
   product.add(rim);
 }
 
+function createSoftServeSwirl() {
+  const profile = [
+    new THREE.Vector2(.1, 0),
+    new THREE.Vector2(.56, .13),
+    new THREE.Vector2(1.03, .37),
+    new THREE.Vector2(1.22, .66),
+    new THREE.Vector2(.98, .93),
+    new THREE.Vector2(.74, 1.16),
+    new THREE.Vector2(.9, 1.39),
+    new THREE.Vector2(.63, 1.68),
+    new THREE.Vector2(.45, 1.95),
+    new THREE.Vector2(.56, 2.17),
+    new THREE.Vector2(.25, 2.43),
+    new THREE.Vector2(.08, 2.58)
+  ];
+  const geometry = new THREE.LatheGeometry(profile, 128);
+  const positions = geometry.attributes.position;
+  const vertex = new THREE.Vector3();
+  for (let index = 0; index < positions.count; index += 1) {
+    vertex.fromBufferAttribute(positions, index);
+    const theta = Math.atan2(vertex.z, vertex.x);
+    const ridge = Math.sin(theta * 5.5 + vertex.y * 6.4) * (.055 - vertex.y * .012);
+    const radius = Math.hypot(vertex.x, vertex.z) + ridge;
+    positions.setXYZ(index, Math.cos(theta) * radius, vertex.y, Math.sin(theta) * radius);
+  }
+  geometry.computeVertexNormals();
+  const material = new THREE.MeshPhysicalMaterial({
+    color: 0xffead8,
+    roughness: .48,
+    clearcoat: .18,
+    clearcoatRoughness: .6,
+    bumpMap: bumpTexture,
+    bumpScale: .018
+  });
+  const swirl = new THREE.Mesh(geometry, material);
+  swirl.position.set(.02, 1.68, -.05);
+  swirl.scale.set(.72, .64, .72);
+  swirl.castShadow = true;
+  swirl.receiveShadow = true;
+  product.add(swirl);
+  return swirl;
+}
+
+function createMeltingEdge() {
+  const meltMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0xf4a2a1,
+    roughness: .38,
+    clearcoat: .38,
+    clearcoatRoughness: .28
+  });
+  const collar = new THREE.Mesh(new THREE.TorusGeometry(1.17, .12, 18, 96), meltMaterial);
+  collar.position.y = -.55;
+  collar.rotation.x = Math.PI / 2;
+  collar.scale.set(1.05, .78, 1);
+  collar.castShadow = true;
+  product.add(collar);
+
+  const drips = [
+    [-.95, .16, .9, .12],
+    [-.52, .44, .62, .08],
+    [.08, .52, 1.08, .11],
+    [.58, .38, .74, .095],
+    [1.03, .1, .5, .075]
+  ];
+  drips.forEach(([x, z, length, radius], index) => {
+    const group = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(radius * .72, radius, length, 18), meltMaterial);
+    body.position.y = -length / 2;
+    const drop = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.28, 18, 14), meltMaterial);
+    drop.position.y = -length;
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(radius, 16, 10), meltMaterial);
+    group.add(body, drop, cap);
+    group.position.set(x, -.58 + Math.sin(index) * .04, z);
+    group.rotation.z = (index - 2) * .04;
+    group.castShadow = true;
+    product.add(group);
+  });
+}
+
 function createPeachSlice(index) {
   const shape = new THREE.Shape();
   shape.moveTo(-.92, -.04);
   shape.bezierCurveTo(-.48, -.62, .52, -.66, .96, -.08);
   shape.bezierCurveTo(.46, .58, -.34, .68, -.92, -.04);
-  const settings = { depth: .18, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: .06, bevelThickness: .05 };
+  const settings = { depth: .13, bevelEnabled: true, bevelSegments: 5, steps: 1, bevelSize: .035, bevelThickness: .025 };
   const group = new THREE.Group();
-  const skin = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, settings), new THREE.MeshPhysicalMaterial({ color: 0xc94e31, roughness: .58 }));
-  const flesh = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, settings), new THREE.MeshPhysicalMaterial({ color: 0xffb52f, roughness: .62, clearcoat: .16 }));
-  flesh.scale.set(.91, .87, .8);
-  flesh.position.z = .075;
+  const skin = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, settings), new THREE.MeshPhysicalMaterial({ color: 0xb45a2f, roughness: .72 }));
+  const flesh = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, settings), new THREE.MeshPhysicalMaterial({ color: 0xf5ad63, roughness: .7, clearcoat: .08 }));
+  flesh.scale.set(.97, .94, .82);
+  flesh.position.z = .052;
   skin.castShadow = flesh.castShadow = true;
   group.add(skin, flesh);
 
-  const groove = new THREE.Mesh(new THREE.TorusGeometry(.33, .035, 8, 26, Math.PI * 1.2), new THREE.MeshStandardMaterial({ color: 0xc84d2c, roughness: .8 }));
+  const groove = new THREE.Mesh(new THREE.TorusGeometry(.33, .018, 8, 28, Math.PI * 1.12), new THREE.MeshStandardMaterial({ color: 0xc77640, roughness: .86 }));
   groove.scale.y = .55;
   groove.position.set(-.1, .23, .28);
   groove.rotation.z = -.25;
@@ -187,9 +264,11 @@ function createPeachSlice(index) {
 
 const scoop = createScoop();
 createCone();
+createMeltingEdge();
+const swirl = createSoftServeSwirl();
 const peachSlices = Array.from({ length: 7 }, (_, index) => createPeachSlice(index));
 
-const leafMaterial = new THREE.MeshPhysicalMaterial({ color: 0x1f6847, roughness: .72, side: THREE.DoubleSide });
+const leafMaterial = new THREE.MeshPhysicalMaterial({ color: 0x365a3d, roughness: .84, side: THREE.DoubleSide });
 for (let index = 0; index < 3; index += 1) {
   const leaf = new THREE.Mesh(new THREE.SphereGeometry(.48, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), leafMaterial);
   leaf.scale.set(1.8, .12, .68);
@@ -201,28 +280,28 @@ for (let index = 0; index < 3; index += 1) {
 }
 
 const particleGeometry = new THREE.SphereGeometry(.045, 8, 8);
-const particleMaterial = new THREE.MeshBasicMaterial({ color: 0xffd277, transparent: true, opacity: .78 });
+const particleMaterial = new THREE.MeshBasicMaterial({ color: 0xffd5a2, transparent: true, opacity: .56 });
 const particles = [];
-for (let index = 0; index < 42; index += 1) {
+for (let index = 0; index < 30; index += 1) {
   const particle = new THREE.Mesh(particleGeometry, particleMaterial);
-  particle.userData.angle = (index / 42) * Math.PI * 2;
+  particle.userData.angle = (index / 30) * Math.PI * 2;
   particle.userData.radius = 2.2 + (index % 7) * .18;
   particle.userData.speed = .08 + (index % 5) * .012;
   ingredients.add(particle);
   particles.push(particle);
 }
 
-const softLight = new THREE.HemisphereLight(0xffe8ca, 0x7d2d2c, 1.55);
+const softLight = new THREE.HemisphereLight(0xffe8ca, 0x6f3a35, 1.25);
 scene.add(softLight);
-const keyLight = new THREE.DirectionalLight(0xfff1d7, 3.5);
+const keyLight = new THREE.DirectionalLight(0xfff1d7, 2.9);
 keyLight.position.set(-4, 6, 5);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(1024, 1024);
 scene.add(keyLight);
-const cursorLight = new THREE.PointLight(0xffcb65, 34, 13, 1.7);
+const cursorLight = new THREE.PointLight(0xffd6a2, 24, 13, 1.7);
 cursorLight.position.set(3, 2, 5);
 scene.add(cursorLight);
-const rimLight = new THREE.PointLight(0xff5c4d, 28, 12, 2);
+const rimLight = new THREE.PointLight(0xff7c6b, 18, 12, 2);
 rimLight.position.set(-5, -1, -2);
 scene.add(rimLight);
 
@@ -339,6 +418,7 @@ function animate() {
   world.rotation.z = lerp(world.rotation.z, view.rz - state.smoothPointer.x * .04, .065);
   product.position.y = Math.sin(time * 1.15) * (reducedMotion ? 0 : .055);
   scoop.rotation.y += reducedMotion ? 0 : delta * .045;
+  swirl.rotation.y -= reducedMotion ? 0 : delta * .035;
 
   const explosion = view.explode + state.burst * 1.65;
   peachSlices.forEach((slice, index) => {
