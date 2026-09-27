@@ -41,24 +41,24 @@ function makeCanvasTexture(draw, size = 512) {
 }
 
 const scoopTexture = makeCanvasTexture((context, size) => {
-  const gradient = context.createRadialGradient(size * .31, size * .22, 12, size * .52, size * .56, size * .78);
-  gradient.addColorStop(0, "#ffe6ce");
-  gradient.addColorStop(.42, "#f7a58c");
-  gradient.addColorStop(.78, "#df6f67");
-  gradient.addColorStop(1, "#b94b41");
+  const gradient = context.createRadialGradient(size * .32, size * .24, 12, size * .5, size * .55, size * .78);
+  gradient.addColorStop(0, "#fff0dc");
+  gradient.addColorStop(.45, "#ffd3bd");
+  gradient.addColorStop(.78, "#f2a398");
+  gradient.addColorStop(1, "#dd7c76");
   context.fillStyle = gradient;
   context.fillRect(0, 0, size, size);
   let seed = 713;
   const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
   for (let i = 0; i < 2600; i += 1) {
     const alpha = .018 + random() * .075;
-    context.fillStyle = random() > .78 ? `rgba(120,42,34,${alpha})` : `rgba(255,245,226,${alpha})`;
+    context.fillStyle = random() > .78 ? `rgba(179,82,72,${alpha * .65})` : `rgba(255,248,232,${alpha})`;
     const radius = .25 + random() * 1.55;
     context.beginPath();
     context.arc(random() * size, random() * size, radius, 0, Math.PI * 2);
     context.fill();
   }
-  context.strokeStyle = "rgba(255,226,204,.12)";
+  context.strokeStyle = "rgba(255,239,222,.1)";
   context.lineWidth = 3;
   for (let line = 0; line < 16; line += 1) {
     context.beginPath();
@@ -115,9 +115,9 @@ function createScoop() {
   const vertex = new THREE.Vector3();
   for (let index = 0; index < positions.count; index += 1) {
     vertex.fromBufferAttribute(positions, index);
-    const wave = Math.sin(vertex.x * 7.1 + vertex.y * 3.2) * .018
-      + Math.sin(vertex.y * 11.4 - vertex.z * 4.7) * .012
-      + Math.cos(vertex.z * 13.2 + vertex.x * 2.8) * .01;
+    const wave = Math.sin(vertex.x * 5.2 + vertex.y * 2.4) * .012
+      + Math.sin(vertex.y * 8.8 - vertex.z * 3.4) * .008
+      + Math.cos(vertex.z * 9.2 + vertex.x * 2.2) * .006;
     vertex.normalize().multiplyScalar(1.56 * (1 + wave));
     positions.setXYZ(index, vertex.x, vertex.y, vertex.z);
   }
@@ -125,15 +125,15 @@ function createScoop() {
   const material = new THREE.MeshPhysicalMaterial({
     map: scoopTexture,
     bumpMap: bumpTexture,
-    bumpScale: .035,
-    roughness: .68,
+    bumpScale: .02,
+    roughness: .6,
     metalness: 0,
     clearcoat: .18,
     clearcoatRoughness: .72
   });
   const scoop = new THREE.Mesh(geometry, material);
-  scoop.position.y = .62;
-  scoop.scale.set(1.08, 1.06, 1.08);
+  scoop.position.y = .08;
+  scoop.scale.set(1.05, .46, 1.02);
   scoop.castShadow = true;
   scoop.receiveShadow = true;
   product.add(scoop);
@@ -187,8 +187,8 @@ function createSoftServeSwirl() {
     bumpScale: .018
   });
   const swirl = new THREE.Mesh(geometry, material);
-  swirl.position.set(.02, 1.66, -.05);
-  swirl.scale.set(.82, .72, .82);
+  swirl.position.set(.02, .72, -.05);
+  swirl.scale.set(1.12, .92, 1.12);
   swirl.castShadow = true;
   swirl.receiveShadow = true;
   product.add(swirl);
@@ -251,20 +251,7 @@ const scoop = createScoop();
 createCone();
 createMeltingEdge();
 const swirl = createSoftServeSwirl();
-const peachSlices = Array.from({ length: 3 }, (_, index) => createPeachSlice(index));
-
-const leafMaterial = new THREE.MeshPhysicalMaterial({ color: 0x5b6b46, roughness: .88, side: THREE.DoubleSide });
-for (let index = 0; index < 1; index += 1) {
-  const leaf = new THREE.Mesh(new THREE.SphereGeometry(.48, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), leafMaterial);
-  leaf.userData.baseScale = .32;
-  leaf.userData.leaf = true;
-  leaf.scale.set(.32, .02, .12);
-  leaf.position.set(index - 1, 1.4 + index * .2, -.5);
-  leaf.rotation.set(.4, index * 1.5, .5);
-  leaf.castShadow = true;
-  ingredients.add(leaf);
-  peachSlices.push(leaf);
-}
+const peachSlices = Array.from({ length: 2 }, (_, index) => createPeachSlice(index));
 
 const particleGeometry = new THREE.SphereGeometry(.045, 8, 8);
 const particleMaterial = new THREE.MeshBasicMaterial({ color: 0xffd5a2, transparent: true, opacity: .56 });
