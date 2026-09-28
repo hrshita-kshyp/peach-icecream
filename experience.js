@@ -76,8 +76,8 @@ function createScoop() {
   const geometry = new THREE.SphereGeometry(1, 192, 128);
   const positions = geometry.attributes.position;
   const colors = [];
-  const cream = new THREE.Color('#ffe2c5');
-  const peach = new THREE.Color('#eeac83');
+  const cream = new THREE.Color('#f6c5a2');
+  const peach = new THREE.Color('#e99477');
   const fruit = new THREE.Color('#ce7850');
   const color = new THREE.Color();
   const vertex = new THREE.Vector3();
@@ -89,7 +89,7 @@ function createScoop() {
     const fine = noise3(x * 48, y * 48, z * 48);
     // Curved shallow scrape marks left by a scoop, with a ragged lower edge.
     const sweep = y * 29 + x * 7 + z * 5 + broad * 3;
-    const scrape = Math.pow(.5 + .5 * Math.sin(sweep), 10) * .024;
+    const scrape = Math.pow(.5 + .5 * Math.sin(sweep), 10) * .009;
     const lower = Math.exp(-Math.pow((y + .55) / .23, 2));
     const scallop = (.5 + .5 * Math.sin(Math.atan2(z, x) * 19 + broad)) * lower * .055;
     const radius = 1.58 * (1 + broad * .045 + medium * .016 + fine * .006 - scrape + scallop);
@@ -103,12 +103,13 @@ function createScoop() {
   geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   geometry.computeVertexNormals();
   const material = new THREE.MeshPhysicalMaterial({
-    vertexColors: true, bumpMap: bumpTexture, bumpScale: .045,
-    roughness: .83, metalness: 0, clearcoat: .045, clearcoatRoughness: .8
+    vertexColors: true, bumpMap: bumpTexture, bumpScale: .016,
+    roughness: .64, metalness: 0, clearcoat: .12, clearcoatRoughness: .55
   });
   const scoop = new THREE.Mesh(geometry, material);
-  scoop.position.y = .38;
-  scoop.scale.setScalar(.9);
+  scoop.position.set(-.49, .13, .12);
+  scoop.scale.setScalar(.61);
+  scoop.rotation.set(.12, .3, -.18);
   scoop.castShadow = scoop.receiveShadow = true;
   product.add(scoop);
   return scoop;
@@ -116,9 +117,9 @@ function createScoop() {
 
 function createServingCup() {
   const label = makeCanvasTexture((ctx, size) => {
-    ctx.fillStyle = '#f4e9d5';
+    ctx.fillStyle = '#244a3c';
     ctx.fillRect(0, 0, size, size);
-    ctx.fillStyle = '#295747';
+    ctx.fillStyle = '#193d30';
     ctx.fillRect(0, size * .88, size, size * .12);
     ctx.fillStyle = '#dd9c78';
     ctx.fillRect(0, size * .085, size, size * .012);
@@ -126,14 +127,14 @@ function createServingCup() {
     for (const x of [size * .25, size * .75]) {
       ctx.save();
       ctx.translate(x, 0);
-      ctx.scale(.3, 1);
+      ctx.scale(.23, 1);
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#295747';
+      ctx.fillStyle = '#fff0d4';
       ctx.font = `italic ${size * .14}px Georgia`;
       ctx.fillText('Peachy', 0, size * .46);
       ctx.font = `${size * .03}px sans-serif`;
       ctx.fillText('SMALL BATCH ICE CREAM', 0, size * .55);
-      ctx.fillStyle = '#a56345';
+      ctx.fillStyle = '#efb68b';
       ctx.font = `${size * .04}px sans-serif`;
       ctx.fillText('PEACH & CREAM', 0, size * .71);
       ctx.restore();
@@ -167,6 +168,8 @@ function createServingCup() {
   cream.position.y = -.34;
   cream.receiveShadow = true;
   cup.add(cream);
+  cup.scale.y = .78;
+  cup.position.y = -.068;
   product.add(cup);
 }
 
@@ -196,6 +199,12 @@ function createPeachSlice(index) {
 }
 
 const scoop = createScoop();
+const secondScoop = new THREE.Mesh(scoop.geometry, scoop.material);
+secondScoop.position.set(.48, .26, -.12);
+secondScoop.scale.setScalar(.63);
+secondScoop.rotation.set(-.25, 2.3, .27);
+secondScoop.castShadow = secondScoop.receiveShadow = true;
+product.add(secondScoop);
 createServingCup();
 
 
@@ -214,15 +223,15 @@ for (let index = 0; index < 30; index += 1) {
   particles.push(particle);
 }
 
-const softLight = new THREE.HemisphereLight(0xfff6e9, 0xc3a99b, 2.4);
+const softLight = new THREE.HemisphereLight(0xfff6e9, 0xa58e7d, 1.35);
 scene.add(softLight);
-const keyLight = new THREE.DirectionalLight(0xfff1d7, 2.9);
+const keyLight = new THREE.DirectionalLight(0xfff1e6, 2.4);
 keyLight.position.set(-4, 6, 5);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
 keyLight.shadow.normalBias = .035;
 keyLight.shadow.radius = 4;
-const fillLight = new THREE.DirectionalLight(0xe7efff, 1.3);
+const fillLight = new THREE.DirectionalLight(0xe7efff, .75);
 fillLight.position.set(4, 1, 4);
 scene.add(fillLight);
 scene.add(keyLight);
@@ -238,7 +247,7 @@ const floor = new THREE.Mesh(
   new THREE.ShadowMaterial({ color: 0x5f1e18, opacity: .08 })
 );
 floor.rotation.x = -Math.PI / 2;
-floor.position.y = -1.85;
+floor.position.y = -1.51;
 floor.receiveShadow = true;
 product.add(floor);
 
