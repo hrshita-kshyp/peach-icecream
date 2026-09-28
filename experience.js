@@ -72,6 +72,33 @@ const bumpTexture = makeCanvasTexture((context, size) => {
 bumpTexture.colorSpace = THREE.NoColorSpace;
 bumpTexture.repeat.set(3, 2);
 
+const gelatoMap = await new THREE.TextureLoader().loadAsync('./gelato-surface-v1.png');
+gelatoMap.colorSpace = THREE.SRGBColorSpace;
+gelatoMap.wrapS = gelatoMap.wrapT = THREE.RepeatWrapping;
+gelatoMap.repeat.set(2, 1);
+gelatoMap.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+const gelatoRelief = gelatoMap.clone();
+gelatoRelief.colorSpace = THREE.NoColorSpace;
+gelatoRelief.needsUpdate = true;
+
+// Broad studio softboxes provide material reflections from every angle.
+const studioMap = makeCanvasTexture((ctx, size) => {
+  ctx.fillStyle = '#84786d';
+  ctx.fillRect(0, 0, size, size);
+  ctx.filter = 'blur(24px)';
+  ctx.fillStyle = '#fff7e9';
+  ctx.fillRect(size * .12, size * .15, size * .17, size * .5);
+  ctx.fillStyle = '#d9e2eb';
+  ctx.fillRect(size * .67, size * .2, size * .12, size * .45);
+});
+studioMap.mapping = THREE.EquirectangularReflectionMapping;
+const environmentGenerator = new THREE.PMREMGenerator(renderer);
+const studioEnvironment = environmentGenerator.fromEquirectangular(studioMap);
+scene.environment = studioEnvironment.texture;
+scene.environmentIntensity = .55;
+studioMap.dispose();
+environmentGenerator.dispose();
+
 function createScoop() {
   const geometry = new THREE.SphereGeometry(1, 192, 128);
   const positions = geometry.attributes.position;
@@ -89,10 +116,10 @@ function createScoop() {
     const fine = noise3(x * 48, y * 48, z * 48);
     // Curved shallow scrape marks left by a scoop, with a ragged lower edge.
     const sweep = y * 29 + x * 7 + z * 5 + broad * 3;
-    const scrape = Math.pow(.5 + .5 * Math.sin(sweep), 10) * .009;
+    const scrape = Math.pow(.5 + .5 * Math.sin(sweep), 10) * .006;
     const lower = Math.exp(-Math.pow((y + .55) / .23, 2));
     const scallop = (.5 + .5 * Math.sin(Math.atan2(z, x) * 19 + broad)) * lower * .055;
-    const radius = 1.58 * (1 + broad * .045 + medium * .016 + fine * .006 - scrape + scallop);
+    const radius = 1.58 * (1 + broad * .025 + medium * .005 + fine * .002 - scrape + scallop * .6);
     positions.setXYZ(i, x * radius, y * radius * .91, z * radius);
     const ribbon = noise3(x * 4 + 12, y * 4, z * 4);
     color.copy(cream).lerp(peach, clamp((ribbon + .3) * .55));
@@ -103,11 +130,12 @@ function createScoop() {
   geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   geometry.computeVertexNormals();
   const material = new THREE.MeshPhysicalMaterial({
-    vertexColors: true, bumpMap: bumpTexture, bumpScale: .016,
-    roughness: .64, metalness: 0, clearcoat: .12, clearcoatRoughness: .55
+    map: gelatoMap, bumpMap: gelatoRelief, bumpScale: .026,
+    roughness: .62, metalness: 0, clearcoat: .08, clearcoatRoughness: .45,
+    sheen: .18, sheenColor: new THREE.Color('#ffe4d1'), sheenRoughness: .8
   });
   const scoop = new THREE.Mesh(geometry, material);
-  scoop.position.set(-.49, .13, .12);
+  scoop.position.set(-.46, .08, .3);
   scoop.scale.setScalar(.61);
   scoop.rotation.set(.12, .3, -.18);
   scoop.castShadow = scoop.receiveShadow = true;
@@ -142,7 +170,7 @@ function createServingCup() {
   }, 1024);
   label.wrapT = THREE.ClampToEdgeWrapping;
   const cup = new THREE.Group();
-  const paper = new THREE.MeshStandardMaterial({ map: label, roughness: .86 });
+  const paper = new THREE.MeshStandardMaterial({ map: label, roughness: .74, bumpMap: bumpTexture, bumpScale: .003 });
   const body = new THREE.Mesh(new THREE.CylinderGeometry(1.29, .99, 1.48, 128, 1, true), paper);
   body.position.y = -1.05;
   body.rotation.y = Math.PI / 2 + .18;
@@ -200,7 +228,7 @@ function createPeachSlice(index) {
 
 const scoop = createScoop();
 const secondScoop = new THREE.Mesh(scoop.geometry, scoop.material);
-secondScoop.position.set(.48, .26, -.12);
+secondScoop.position.set(.43, .28, -.26);
 secondScoop.scale.setScalar(.63);
 secondScoop.rotation.set(-.25, 2.3, .27);
 secondScoop.castShadow = secondScoop.receiveShadow = true;
@@ -223,7 +251,7 @@ for (let index = 0; index < 30; index += 1) {
   particles.push(particle);
 }
 
-const softLight = new THREE.HemisphereLight(0xfff6e9, 0xa58e7d, 1.35);
+const softLight = new THREE.HemisphereLight(0xfff6e9, 0xa58e7d, .75);
 scene.add(softLight);
 const keyLight = new THREE.DirectionalLight(0xfff1e6, 2.4);
 keyLight.position.set(-4, 6, 5);
@@ -242,9 +270,17 @@ const rimLight = new THREE.PointLight(0xff7c6b, 18, 12, 2);
 rimLight.position.set(-5, -1, -2);
 scene.add(rimLight);
 
+const contactShadow = makeCanvasTexture((ctx, size) => {
+  const fade = ctx.createRadialGradient(size / 2, size / 2, size * .12, size / 2, size / 2, size * .48);
+  fade.addColorStop(0, 'rgba(65,30,16,.24)');
+  fade.addColorStop(.55, 'rgba(65,30,16,.12)');
+  fade.addColorStop(1, 'rgba(65,30,16,0)');
+  ctx.fillStyle = fade;
+  ctx.fillRect(0, 0, size, size);
+});
 const floor = new THREE.Mesh(
-  new THREE.CircleGeometry(3.2, 64),
-  new THREE.ShadowMaterial({ color: 0x5f1e18, opacity: .08 })
+  new THREE.PlaneGeometry(4.6, 3.4),
+  new THREE.MeshBasicMaterial({ map: contactShadow, transparent: true, depthWrite: false })
 );
 floor.rotation.x = -Math.PI / 2;
 floor.position.y = -1.51;
